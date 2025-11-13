@@ -74,32 +74,32 @@ if (in_array($method, ['POST', 'PUT', 'PATCH'], true)) {
 try {
     switch ($method) {
         // ===========================
-        // GET: Lernenden lesen
+        // GET: Lehrbetrieb lesen
         // ===========================
         case 'GET':
-            // Erwartet ?id_lernende=1
-            if (!isset($_GET['id_lernende'])) {
-                sendError('Parameter "id_lernende" ist erforderlich', 400);
+            // Erwartet ?id_lehrbetrieb=1
+            if (!isset($_GET['id_lehrbetrieb'])) {
+                sendError('Parameter "id_lehrbetrieb" ist erforderlich', 400);
             }
 
-            $id = (int) $_GET['id_lernende'];
+            $id = (int) $_GET['id_lehrbetrieb'];
             if ($id <= 0) {
-                sendError('Parameter "id_lernende" muss eine positive Zahl sein', 400);
+                sendError('Parameter "id_lehrbetrieb" muss eine positive Zahl sein', 400);
             }
 
-            $stmt = $pdo->prepare('SELECT * FROM tbl_lernende WHERE id_lernende = ?');
+            $stmt = $pdo->prepare('SELECT * FROM tbl_lehrbetriebe WHERE id_lehrbetrieb = ?');
             $stmt->execute([$id]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$row) {
-                sendError('Lernende/r nicht gefunden', 404);
+                sendError('Lehrbetrieb nicht gefunden', 404);
             }
 
             sendJson($row);
             break;
 
         // ===========================
-        // POST: Lernenden erstellen
+        // POST: Lehrbetrieb erstellen
         // ===========================
         case 'POST':
             if (!is_array($input)) {
@@ -107,7 +107,7 @@ try {
             }
 
             // Pflichtfelder prüfen
-            $required = ['nachname', 'vorname', 'email'];
+            $required = ['firma'];
             $missing  = [];
 
             foreach ($required as $field) {
@@ -125,65 +125,54 @@ try {
             }
 
             $sql = '
-                INSERT INTO tbl_lernende (
-                    nachname, vorname, email, strasse, plz, ort,
-                    nr_land, geschlecht, telefon, handy, email_privat, birthdate
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO tbl_lehrbetriebe (
+                    firma, strasse, plz, ort
+                ) VALUES (?, ?, ?, ?)
             ';
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                $input['nachname'],
-                $input['vorname'],
-                $input['email'],
-                $input['strasse']       ?? null,
-                $input['plz']           ?? null,
-                $input['ort']           ?? null,
-                $input['nr_land']       ?? null,
-                $input['geschlecht']    ?? null,
-                $input['telefon']       ?? null,
-                $input['handy']         ?? null,
-                $input['email_privat']  ?? null,
-                $input['birthdate']     ?? null,
+                $input['firma'],
+                $input['strasse'] ?? null,
+                $input['plz']     ?? null,
+                $input['ort']     ?? null,
             ]);
 
             $newId = (int) $pdo->lastInsertId();
 
             sendJson([
-                'id_lernende' => $newId,
-                'message'     => 'Lernende/r erfolgreich erstellt',
+                'id_lehrbetrieb' => $newId,
+                'message'        => 'Lehrbetrieb erfolgreich erstellt',
             ], 201);
             break;
 
         // ===========================
-        // PUT: Lernenden aktualisieren
+        // PUT: Lehrbetrieb aktualisieren
         // ===========================
         case 'PUT':
             if (!is_array($input)) {
                 sendError('Request-Body erwartet JSON-Objekt', 400);
             }
 
-            if (empty($input['id_lernende'])) {
-                sendError('Feld "id_lernende" ist erforderlich', 400);
+            if (empty($input['id_lehrbetrieb'])) {
+                sendError('Feld "id_lehrbetrieb" ist erforderlich', 400);
             }
 
-            $id = (int) $input['id_lernende'];
+            $id = (int) $input['id_lehrbetrieb'];
             if ($id <= 0) {
-                sendError('"id_lernende" muss eine positive Zahl sein', 400);
+                sendError('"id_lehrbetrieb" muss eine positive Zahl sein', 400);
             }
 
             $fields = [];
             $params = [];
 
-            // Liste erlaubter Spalten, damit nicht beliebige Spalten gesetzt werden können
+            // Liste erlaubter Spalten
             $allowedColumns = [
-                'nachname', 'vorname', 'email', 'strasse', 'plz', 'ort',
-                'nr_land', 'geschlecht', 'telefon', 'handy',
-                'email_privat', 'birthdate',
+                'firma', 'strasse', 'plz', 'ort',
             ];
 
             foreach ($input as $key => $value) {
-                if ($key === 'id_lernende') {
+                if ($key === 'id_lehrbetrieb') {
                     continue;
                 }
 
@@ -197,7 +186,7 @@ try {
                 sendError('Keine gültigen Felder zum Aktualisieren übergeben', 400);
             }
 
-            $sql      = 'UPDATE tbl_lernende SET ' . implode(', ', $fields) . ' WHERE id_lernende = ?';
+            $sql      = 'UPDATE tbl_lehrbetriebe SET ' . implode(', ', $fields) . ' WHERE id_lehrbetrieb = ?';
             $params[] = $id;
 
             $stmt = $pdo->prepare($sql);
@@ -205,12 +194,11 @@ try {
 
             if ($stmt->rowCount() === 0) {
                 // Kann bedeuten: ID existiert nicht oder Werte waren identisch
-                // Wir prüfen hier nach, ob die ID existiert
-                $check = $pdo->prepare('SELECT 1 FROM tbl_lernende WHERE id_lernende = ?');
+                $check = $pdo->prepare('SELECT 1 FROM tbl_lehrbetriebe WHERE id_lehrbetrieb = ?');
                 $check->execute([$id]);
 
                 if (!$check->fetchColumn()) {
-                    sendError('Lernende/r nicht gefunden', 404);
+                    sendError('Lehrbetrieb nicht gefunden', 404);
                 }
 
                 // ID existiert, aber nichts geändert
@@ -220,37 +208,37 @@ try {
             }
 
             // Aktualisierten Datensatz zurückgeben
-            $stmt = $pdo->prepare('SELECT * FROM tbl_lernende WHERE id_lernende = ?');
+            $stmt = $pdo->prepare('SELECT * FROM tbl_lehrbetriebe WHERE id_lehrbetrieb = ?');
             $stmt->execute([$id]);
             $updated = $stmt->fetch(PDO::FETCH_ASSOC);
 
             sendJson([
-                'message'         => 'Lernende/r erfolgreich aktualisiert',
-                'updated_student' => $updated,
+                'message'        => 'Lehrbetrieb erfolgreich aktualisiert',
+                'updated_record' => $updated,
             ]);
             break;
 
         // ===========================
-        // DELETE: Lernenden löschen
+        // DELETE: Lehrbetrieb löschen
         // ===========================
         case 'DELETE':
-            if (!isset($_GET['id_lernende'])) {
-                sendError('Parameter "id_lernende" ist erforderlich', 400);
+            if (!isset($_GET['id_lehrbetrieb'])) {
+                sendError('Parameter "id_lehrbetrieb" ist erforderlich', 400);
             }
 
-            $id = (int) $_GET['id_lernende'];
+            $id = (int) $_GET['id_lehrbetrieb'];
             if ($id <= 0) {
-                sendError('"id_lernende" muss eine positive Zahl sein', 400);
+                sendError('"id_lehrbetrieb" muss eine positive Zahl sein', 400);
             }
 
-            $stmt = $pdo->prepare('DELETE FROM tbl_lernende WHERE id_lernende = ?');
+            $stmt = $pdo->prepare('DELETE FROM tbl_lehrbetriebe WHERE id_lehrbetrieb = ?');
             $stmt->execute([$id]);
 
             if ($stmt->rowCount() === 0) {
-                sendError('Lernende/r nicht gefunden', 404);
+                sendError('Lehrbetrieb nicht gefunden', 404);
             }
 
-            sendJson(['message' => 'Lernende/r erfolgreich gelöscht']);
+            sendJson(['message' => 'Lehrbetrieb erfolgreich gelöscht']);
             break;
 
         // ===========================
@@ -260,7 +248,7 @@ try {
             sendError('HTTP-Methode nicht erlaubt', 405);
     }
 } catch (PDOException $e) {
-    // DB-Fehler: intern loggen, aber generische Meldung an den Client
+    // DB-Fehler: intern loggen, aber generische Fehlermeldung an den Client
     try {
         logException($e);
     } catch (Throwable $ignore) {
