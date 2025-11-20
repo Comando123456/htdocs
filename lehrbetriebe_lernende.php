@@ -8,10 +8,10 @@ $pdo = Database::getConnection();
 
 $controller = new CrudController(
     $pdo,
-    'tbl_countries',          // Tabellenname
-    'id_country',             // Primärschlüssel
-    ['country'],              // erlaubte Spalten
-    ['country']               // Pflichtfelder bei POST
+    'tbl_lehrbetriebe_lernende',
+    'id_lehrbetriebe_lernende',
+    ['nr_lehrbetrieb', 'nr_lernende', 'start', 'ende', 'beruf'],
+    ['nr_lehrbetrieb', 'nr_lernende']   // Pflichtfelder bei POST
 );
 
 $controller->handle();

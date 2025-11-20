@@ -8,14 +8,14 @@ $pdo = Database::getConnection();
 
 $controller = new CrudController(
     $pdo,
-    'tbl_lernende',
-    'id_lernende',
+    'tbl_dozenten',
+    'id_dozent',
     [
         'vorname', 'nachname', 'strasse', 'plz', 'ort',
         'nr_land', 'geschlecht', 'telefon', 'handy',
-        'email', 'email_privat', 'birthdate'
+        'email', 'birthdate'
     ],
-    ['nachname', 'vorname', 'email']   // Pflichtfelder bei POST
+    ['vorname', 'nachname']   // Pflichtfelder bei POST
 );
 
 $controller->handle();

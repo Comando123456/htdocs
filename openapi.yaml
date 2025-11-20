@@ -1,0 +1,1257 @@
+openapi: 3.0.3
+info:
+  title: Kursverwaltung Backend API
+  version: "1.0.0"
+  description: |
+    RESTful Backend für eine Kursverwaltung im Rahmen von Modul 295
+    «Backend für Applikationen realisieren».
+
+    Dieses Backend stellt CRUD-Operationen für folgende Ressourcen bereit:
+    - Länder
+    - Lehrbetriebe
+    - Lernende
+    - Dozenten
+    - Kurse
+    - Zuordnungen Kurse–Lernende
+    - Zuordnungen Lehrbetriebe–Lernende
+
+    Alle Endpoints verwenden JSON (`application/json`) als Datenformat.
+servers:
+  - url: http://localhost
+    description: Lokale Entwicklungsumgebung (XAMPP, htdocs)
+
+tags:
+  - name: Laender
+    description: Verwaltung der Länder (tbl_countries)
+  - name: Lehrbetriebe
+    description: Verwaltung der Lehrbetriebe (tbl_lehrbetriebe)
+  - name: Lernende
+    description: Verwaltung der Lernenden (tbl_lernende)
+  - name: Dozenten
+    description: Verwaltung der Dozenten (tbl_dozenten)
+  - name: Kurse
+    description: Verwaltung der Kurse (tbl_kurse)
+  - name: KurseLernende
+    description: Zuordnung Kurse ↔ Lernende (tbl_kurse_lernende)
+  - name: LehrbetriebeLernende
+    description: Zuordnung Lehrbetriebe ↔ Lernende (tbl_lehrbetriebe_lernende)
+
+paths:
+  /laender.php:
+    get:
+      tags: [Laender]
+      summary: Länder lesen
+      description: >
+        Liefert entweder ein einzelnes Land (`id_country`) oder – bei gesetztem
+        Parameter `all=1` – alle Länder.
+      parameters:
+        - in: query
+          name: id_country
+          schema:
+            type: integer
+          description: Primärschlüssel des Landes.
+        - in: query
+          name: all
+          schema:
+            type: boolean
+          description: Wenn gesetzt (z.B. `all=1`), werden alle Einträge zurückgegeben.
+      responses:
+        "200":
+          description: Land oder Liste von Ländern
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Country'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Country'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Laender]
+      summary: Land erstellen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountryCreate'
+      responses:
+        "201":
+          description: Land erfolgreich erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Laender]
+      summary: Land aktualisieren
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountryUpdate'
+      responses:
+        "200":
+          description: Land erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Laender]
+      summary: Land löschen
+      parameters:
+        - in: query
+          name: id_country
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Land gelöscht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /lehrbetriebe.php:
+    get:
+      tags: [Lehrbetriebe]
+      summary: Lehrbetriebe lesen
+      description: >
+        Liefert einen Lehrbetrieb (`id_lehrbetrieb`) oder – bei `all=1` – alle Lehrbetriebe.
+      parameters:
+        - in: query
+          name: id_lehrbetrieb
+          schema:
+            type: integer
+        - in: query
+          name: all
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Lehrbetrieb oder Liste von Lehrbetrieben
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Lehrbetrieb'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Lehrbetrieb'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Lehrbetriebe]
+      summary: Lehrbetrieb erstellen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LehrbetriebCreate'
+      responses:
+        "201":
+          description: Lehrbetrieb erfolgreich erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Lehrbetriebe]
+      summary: Lehrbetrieb aktualisieren
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LehrbetriebUpdate'
+      responses:
+        "200":
+          description: Lehrbetrieb erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Lehrbetriebe]
+      summary: Lehrbetrieb löschen
+      parameters:
+        - in: query
+          name: id_lehrbetrieb
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lehrbetrieb gelöscht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /lernende.php:
+    get:
+      tags: [Lernende]
+      summary: Lernende lesen
+      parameters:
+        - in: query
+          name: id_lernende
+          schema:
+            type: integer
+        - in: query
+          name: all
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Lernende/r oder Liste von Lernenden
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Lernende'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Lernende'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Lernende]
+      summary: Lernende/n erstellen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LernendeCreate'
+      responses:
+        "201":
+          description: Lernende/r erfolgreich erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Lernende]
+      summary: Lernende/n aktualisieren
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LernendeUpdate'
+      responses:
+        "200":
+          description: Lernende/r erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Lernende]
+      summary: Lernende/n löschen
+      parameters:
+        - in: query
+          name: id_lernende
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lernende/r gelöscht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /dozenten.php:
+    get:
+      tags: [Dozenten]
+      summary: Dozenten lesen
+      parameters:
+        - in: query
+          name: id_dozent
+          schema:
+            type: integer
+        - in: query
+          name: all
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Dozent/in oder Liste von Dozenten
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Dozent'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Dozent'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Dozenten]
+      summary: Dozent/in erstellen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DozentCreate'
+      responses:
+        "201":
+          description: Dozent/in erfolgreich erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Dozenten]
+      summary: Dozent/in aktualisieren
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DozentUpdate'
+      responses:
+        "200":
+          description: Dozent/in erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Dozenten]
+      summary: Dozent/in löschen
+      parameters:
+        - in: query
+          name: id_dozent
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dozent/in gelöscht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /kurse.php:
+    get:
+      tags: [Kurse]
+      summary: Kurse lesen
+      parameters:
+        - in: query
+          name: id_kurs
+          schema:
+            type: integer
+        - in: query
+          name: all
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Kurs oder Liste von Kursen
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Kurs'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Kurs'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Kurse]
+      summary: Kurs erstellen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KursCreate'
+      responses:
+        "201":
+          description: Kurs erfolgreich erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Kurse]
+      summary: Kurs aktualisieren
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KursUpdate'
+      responses:
+        "200":
+          description: Kurs erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Kurse]
+      summary: Kurs löschen
+      parameters:
+        - in: query
+          name: id_kurs
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Kurs gelöscht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /kurse_lernende.php:
+    get:
+      tags: [KurseLernende]
+      summary: Kurs–Lernende Zuordnungen lesen
+      parameters:
+        - in: query
+          name: id_kurse_lernende
+          schema:
+            type: integer
+        - in: query
+          name: nr_kurs
+          schema:
+            type: integer
+        - in: query
+          name: nr_lernende
+          schema:
+            type: integer
+        - in: query
+          name: all
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Zuordnung oder Liste von Zuordnungen
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/KursLernende'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/KursLernende'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [KurseLernende]
+      summary: Kurs–Lernende Zuordnung erstellen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KursLernendeCreate'
+      responses:
+        "201":
+          description: Zuordnung erfolgreich erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [KurseLernende]
+      summary: Kurs–Lernende Zuordnung aktualisieren
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KursLernendeUpdate'
+      responses:
+        "200":
+          description: Zuordnung erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [KurseLernende]
+      summary: Kurs–Lernende Zuordnung löschen
+      parameters:
+        - in: query
+          name: id_kurse_lernende
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Zuordnung gelöscht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /lehrbetriebe_lernende.php:
+    get:
+      tags: [LehrbetriebeLernende]
+      summary: Lehrbetrieb–Lernende Zuordnungen lesen
+      parameters:
+        - in: query
+          name: id_lehrbetriebe_lernende
+          schema:
+            type: integer
+        - in: query
+          name: nr_lehrbetrieb
+          schema:
+            type: integer
+        - in: query
+          name: nr_lernende
+          schema:
+            type: integer
+        - in: query
+          name: all
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Zuordnung oder Liste von Zuordnungen
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/LehrbetriebLernende'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/LehrbetriebLernende'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [LehrbetriebeLernende]
+      summary: Lehrbetrieb–Lernende Zuordnung erstellen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LehrbetriebLernendeCreate'
+      responses:
+        "201":
+          description: Zuordnung erfolgreich erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [LehrbetriebeLernende]
+      summary: Lehrbetrieb–Lernende Zuordnung aktualisieren
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LehrbetriebLernendeUpdate'
+      responses:
+        "200":
+          description: Zuordnung erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [LehrbetriebeLernende]
+      summary: Lehrbetrieb–Lernende Zuordnung löschen
+      parameters:
+        - in: query
+          name: id_lehrbetriebe_lernende
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Zuordnung gelöscht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+components:
+  responses:
+    BadRequest:
+      description: Ungültige Anfrage (Validierung, Pflichtfelder, etc.)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Ressource nicht gefunden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Interner Serverfehler
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: object
+          nullable: true
+          additionalProperties: true
+
+    CreateResponse:
+      type: object
+      description: Generische Antwort bei erfolgreichem POST
+      properties:
+        message:
+          type: string
+        # ID-Feld ist je nach Tabelle unterschiedlich (z.B. id_country, id_lehrbetrieb)
+        # Deswegen wird hier kein fixes Feld erzwungen.
+      additionalProperties: true
+
+    UpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        updated:
+          type: object
+          additionalProperties: true
+
+    DeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    Country:
+      type: object
+      properties:
+        id_country:
+          type: integer
+        country:
+          type: string
+
+    CountryCreate:
+      type: object
+      required: [country]
+      properties:
+        country:
+          type: string
+
+    CountryUpdate:
+      type: object
+      required: [id_country]
+      properties:
+        id_country:
+          type: integer
+        country:
+          type: string
+
+    Lehrbetrieb:
+      type: object
+      properties:
+        id_lehrbetrieb:
+          type: integer
+        firma:
+          type: string
+        strasse:
+          type: string
+          nullable: true
+        plz:
+          type: string
+          nullable: true
+        ort:
+          type: string
+          nullable: true
+
+    LehrbetriebCreate:
+      type: object
+      required: [firma]
+      properties:
+        firma:
+          type: string
+        strasse:
+          type: string
+          nullable: true
+        plz:
+          type: string
+          nullable: true
+        ort:
+          type: string
+          nullable: true
+
+    LehrbetriebUpdate:
+      type: object
+      required: [id_lehrbetrieb]
+      properties:
+        id_lehrbetrieb:
+          type: integer
+        firma:
+          type: string
+        strasse:
+          type: string
+        plz:
+          type: string
+        ort:
+          type: string
+
+    Lernende:
+      type: object
+      properties:
+        id_lernende:
+          type: integer
+        vorname:
+          type: string
+        nachname:
+          type: string
+        email:
+          type: string
+        strasse:
+          type: string
+          nullable: true
+        plz:
+          type: string
+          nullable: true
+        ort:
+          type: string
+          nullable: true
+        nr_land:
+          type: integer
+          nullable: true
+        geschlecht:
+          type: string
+          enum: [m, w, d]
+          nullable: true
+        telefon:
+          type: string
+          nullable: true
+        handy:
+          type: string
+          nullable: true
+        email_privat:
+          type: string
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+
+    LernendeCreate:
+      type: object
+      required: [vorname, nachname, email]
+      properties:
+        vorname:
+          type: string
+        nachname:
+          type: string
+        email:
+          type: string
+        strasse:
+          type: string
+          nullable: true
+        plz:
+          type: string
+          nullable: true
+        ort:
+          type: string
+          nullable: true
+        nr_land:
+          type: integer
+          nullable: true
+        geschlecht:
+          type: string
+          enum: [m, w, d]
+          nullable: true
+        telefon:
+          type: string
+          nullable: true
+        handy:
+          type: string
+          nullable: true
+        email_privat:
+          type: string
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+
+    LernendeUpdate:
+      type: object
+      required: [id_lernende]
+      properties:
+        id_lernende:
+          type: integer
+        vorname:
+          type: string
+        nachname:
+          type: string
+        email:
+          type: string
+        strasse:
+          type: string
+        plz:
+          type: string
+        ort:
+          type: string
+        nr_land:
+          type: integer
+        geschlecht:
+          type: string
+          enum: [m, w, d]
+        telefon:
+          type: string
+        handy:
+          type: string
+        email_privat:
+          type: string
+        birthdate:
+          type: string
+          format: date
+
+    Dozent:
+      type: object
+      properties:
+        id_dozent:
+          type: integer
+        vorname:
+          type: string
+        nachname:
+          type: string
+        strasse:
+          type: string
+          nullable: true
+        plz:
+          type: string
+          nullable: true
+        ort:
+          type: string
+          nullable: true
+        nr_land:
+          type: integer
+          nullable: true
+        geschlecht:
+          type: string
+          enum: [m, w, d]
+          nullable: true
+        telefon:
+          type: string
+          nullable: true
+        handy:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+
+    DozentCreate:
+      type: object
+      required: [vorname, nachname]
+      properties:
+        vorname:
+          type: string
+        nachname:
+          type: string
+        strasse:
+          type: string
+          nullable: true
+        plz:
+          type: string
+          nullable: true
+        ort:
+          type: string
+          nullable: true
+        nr_land:
+          type: integer
+          nullable: true
+        geschlecht:
+          type: string
+          enum: [m, w, d]
+          nullable: true
+        telefon:
+          type: string
+          nullable: true
+        handy:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+
+    DozentUpdate:
+      type: object
+      required: [id_dozent]
+      properties:
+        id_dozent:
+          type: integer
+        vorname:
+          type: string
+        nachname:
+          type: string
+        strasse:
+          type: string
+        plz:
+          type: string
+        ort:
+          type: string
+        nr_land:
+          type: integer
+        geschlecht:
+          type: string
+          enum: [m, w, d]
+        telefon:
+          type: string
+        handy:
+          type: string
+        email:
+          type: string
+        birthdate:
+          type: string
+          format: date
+
+    Kurs:
+      type: object
+      properties:
+        id_kurs:
+          type: integer
+        kursnummer:
+          type: string
+          nullable: true
+        kursthema:
+          type: string
+          nullable: true
+        inhalt:
+          type: string
+          nullable: true
+        nr_dozent:
+          type: integer
+          nullable: true
+        startdatum:
+          type: string
+          format: date
+          nullable: true
+        enddatum:
+          type: string
+          format: date
+          nullable: true
+        dauer:
+          type: integer
+          nullable: true
+
+    KursCreate:
+      type: object
+      required: [kursnummer, kursthema]
+      properties:
+        kursnummer:
+          type: string
+        kursthema:
+          type: string
+        inhalt:
+          type: string
+          nullable: true
+        nr_dozent:
+          type: integer
+          nullable: true
+        startdatum:
+          type: string
+          format: date
+          nullable: true
+        enddatum:
+          type: string
+          format: date
+          nullable: true
+        dauer:
+          type: integer
+          nullable: true
+
+    KursUpdate:
+      type: object
+      required: [id_kurs]
+      properties:
+        id_kurs:
+          type: integer
+        kursnummer:
+          type: string
+        kursthema:
+          type: string
+        inhalt:
+          type: string
+        nr_dozent:
+          type: integer
+        startdatum:
+          type: string
+          format: date
+        enddatum:
+          type: string
+          format: date
+        dauer:
+          type: integer
+
+    KursLernende:
+      type: object
+      properties:
+        id_kurse_lernende:
+          type: integer
+        nr_kurs:
+          type: integer
+        nr_lernende:
+          type: integer
+        note:
+          type: number
+          format: float
+          nullable: true
+
+    KursLernendeCreate:
+      type: object
+      required: [nr_kurs, nr_lernende]
+      properties:
+        nr_kurs:
+          type: integer
+        nr_lernende:
+          type: integer
+        note:
+          type: number
+          format: float
+          nullable: true
+
+    KursLernendeUpdate:
+      type: object
+      required: [id_kurse_lernende]
+      properties:
+        id_kurse_lernende:
+          type: integer
+        nr_kurs:
+          type: integer
+        nr_lernende:
+          type: integer
+        note:
+          type: number
+          format: float
+          nullable: true
+
+    LehrbetriebLernende:
+      type: object
+      properties:
+        id_lehrbetriebe_lernende:
+          type: integer
+        nr_lehrbetrieb:
+          type: integer
+        nr_lernende:
+          type: integer
+        start:
+          type: string
+          format: date
+          nullable: true
+        ende:
+          type: string
+          format: date
+          nullable: true
+        beruf:
+          type: string
+          nullable: true
+
+    LehrbetriebLernendeCreate:
+      type: object
+      required: [nr_lehrbetrieb, nr_lernende]
+      properties:
+        nr_lehrbetrieb:
+          type: integer
+        nr_lernende:
+          type: integer
+        start:
+          type: string
+          format: date
+          nullable: true
+        ende:
+          type: string
+          format: date
+          nullable: true
+        beruf:
+          type: string
+          nullable: true
+
+    LehrbetriebLernendeUpdate:
+      type: object
+      required: [id_lehrbetriebe_lernende]
+      properties:
+        id_lehrbetriebe_lernende:
+          type: integer
+        nr_lehrbetrieb:
+          type: integer
+        nr_lernende:
+          type: integer
+        start:
+          type: string
+          format: date
+        ende:
+          type: string
+          format: date
+        beruf:
+          type: string
