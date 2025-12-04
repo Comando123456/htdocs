@@ -129,11 +129,13 @@ final class CrudController
         // Prüft, ob der Query-Parameter 'all' gesetzt ist
         if (isset($_GET['all'])) {
             // Liest alle Datensätze aus der Tabelle ohne WHERE-Bedingung
-            $stmt = $this->pdo->query("SELECT * FROM {$this->table}");
-            
+            // Verwende prepare() auch ohne Parameter für konsistente Behandlung
+            $stmt = $this->pdo->prepare("SELECT * FROM {$this->table}");
+            $stmt->execute();
+
             // Holt alle Zeilen als assoziatives Array (Spaltenname => Wert)
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             // Gibt die Ergebnisse als JSON zurück
             Validation::json($rows);
         }
