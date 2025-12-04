@@ -767,7 +767,7 @@ paths:
               example:
                 success: true
                 affected_rows: 1
-  /lehrbetrieb_lernende.php:
+  /lehrbetriebe_lernende.php:
     get:
       tags: [LehrbetriebeLernende]
       summary: Lehrbetrieb–Lernende Zuordnungen lesen
