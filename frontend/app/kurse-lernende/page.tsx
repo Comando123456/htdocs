@@ -1,15 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
 type KursLernender = {
     id_kurse_lernende?: number;
     nr_kurs?: number | string;
     nr_lernende?: number | string;
     note?: number | string;
+    kursthema?: string;
+    lernender_name?: string;
 };
 
 export default function KurseLernendePage() {
-    const [data, setData] = useState<KursLernender[] | null>(null);
+    const [data, setData] = useState<KursLernender[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [editOpen, setEditOpen] = useState(false);
@@ -26,7 +29,7 @@ export default function KurseLernendePage() {
         setLoading(true);
         setError(null);
         try {
-            const resp = await fetch(API_BASE_URL + "/kurse_lernende.php?all");
+            const resp = await fetch(API_BASE_URL + "/joins.php?type=kurse_lernende");
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const json = await resp.json();
             if (!Array.isArray(json)) throw new Error("Unerwartetes Antwortformat");
@@ -41,11 +44,7 @@ export default function KurseLernendePage() {
 
     const handleNew = () => {
         setEditItem(null);
-        setEditForm({
-            nr_kurs: "",
-            nr_lernende: "",
-            note: "",
-        });
+        setEditForm({ nr_kurs: "", nr_lernende: "", note: "" });
         setEditOpen(true);
     };
 
@@ -69,10 +68,7 @@ export default function KurseLernendePage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(
                     isEdit
-                        ? {
-                            id_kurse_lernende: editItem!.id_kurse_lernende,
-                            ...editForm,
-                        }
+                        ? { id_kurse_lernende: editItem!.id_kurse_lernende, ...editForm }
                         : editForm
                 ),
             });
@@ -89,23 +85,15 @@ export default function KurseLernendePage() {
     };
 
     const handleDelete = async (p: KursLernender) => {
-        if (!p.id_kurse_lernende) {
-            alert("Keine gültige ID");
-            return;
-        }
-
-        if (
-            !confirm(
-                `Eintrag löschen? (Kurs ${p.nr_kurs}, Lernender ${p.nr_lernende})`
-            )
-        )
+        if (!p.id_kurse_lernende) return;
+        if (!confirm(`Eintrag löschen?\nKurs: ${p.kursthema}\nLernender: ${p.lernender_name}`))
             return;
 
         try {
             const resp = await fetch(
-                API_BASE_URL +
-                "/kurse_lernende.php?id_kurse_lernende=" +
-                encodeURIComponent(String(p.id_kurse_lernende)),
+                `${API_BASE_URL}/kurse_lernende.php?id_kurse_lernende=${encodeURIComponent(
+                    String(p.id_kurse_lernende)
+                )}`,
                 { method: "DELETE" }
             );
 
@@ -119,186 +107,150 @@ export default function KurseLernendePage() {
     };
 
     return (
-        <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-            <h1>Kursverwaltung – Kurse–Lernende</h1>
-
-            <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-                <button
-                    onClick={() => window.history.back()}
-                    style={{ marginRight: "0.5rem", padding: "0.5rem 1rem" }}
-                >
-                    Zurück
-                </button>
-                <button
-                    onClick={handleNew}
-                    style={{ padding: "0.5rem 1rem" }}
-                >
-                    Neuer Eintrag
-                </button>
-            </div>
-
-            {loading && <p>Lade Daten …</p>}
-            {error && <p style={{ color: "crimson" }}>Fehler: {error}</p>}
-
-            <table
-                style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    marginTop: "1rem",
-                }}
-            >
-                <caption
-                    style={{
-                        textAlign: "left",
-                        marginBottom: "0.5rem",
-                        fontWeight: 600,
-                    }}
-                >
-                    Kurse–Lernende Übersicht
-                </caption>
-                <thead>
-                <tr>
-                    {["Kurs ID", "Lernende ID", "Note", "Aktionen"].map(
-                        (h) => (
-                            <th
-                                key={h}
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                    textAlign: "left",
-                                }}
-                            >
-                                {h}
-                            </th>
-                        )
-                    )}
-                </tr>
-                </thead>
-                <tbody>
-                {!data || data.length === 0 ? (
-                    <tr>
-                        <td
-                            colSpan={4}
+        <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
+            {/* Header */}
+            <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "2rem 0" }}>
+                <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+                        <button
+                            onClick={() => window.history.back()}
                             style={{
-                                border: "1px solid #ccc",
-                                padding: "0.5rem",
+                                background: "white",
+                                color: "#64748b",
+                                border: "1px solid #e2e8f0",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
                             }}
                         >
-                            Keine Einträge vorhanden.
-                        </td>
-                    </tr>
-                ) : (
-                    data.map((p) => (
-                        <tr key={p.id_kurse_lernende}>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                {p.nr_kurs ?? "-"}
-                            </td>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                {p.nr_lernende ?? "-"}
-                            </td>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                {p.note ?? "-"}
-                            </td>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                <button
-                                    style={{
-                                        marginRight: "0.5rem",
-                                        padding: "0.25rem 0.5rem",
-                                    }}
-                                    onClick={() => handleEdit(p)}
-                                >
-                                    Bearbeiten
-                                </button>
-                                <button
-                                    style={{
-                                        padding: "0.25rem 0.5rem",
-                                    }}
-                                    onClick={() => handleDelete(p)}
-                                >
-                                    Löschen
-                                </button>
-                            </td>
-                        </tr>
-                    ))
-                )}
-                </tbody>
-            </table>
+                            <ArrowLeft size={18} /> Zurück
+                        </button>
+                    </div>
 
-            {editOpen && (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                            <h1 style={{ fontSize: "2rem", fontWeight: 700, color: "#0f172a" }}>
+                                Kurse – Lernende
+                            </h1>
+                            <p style={{ color: "#64748b" }}>
+                                Zuordnung von Lernenden zu Kursen
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleNew}
+                            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+                        >
+                            <Plus size={18} /> Neuer Eintrag
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Content */}
+            <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {loading && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b" }}>
+                        <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
+                        Lade Daten…
+                    </div>
+                )}
+
+                {error && (
+                    <div style={{ padding: "1rem", background: "#fee", color: "#c00", borderRadius: "0.5rem" }}>
+                        {error}
+                    </div>
+                )}
+
                 <div
                     style={{
-                        position: "fixed",
-                        inset: 0,
-                        background: "rgba(0,0,0,0.4)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        zIndex: 1000,
+                        background: "white",
+                        borderRadius: "0.75rem",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                        overflow: "hidden",
                     }}
-                    onClick={() => setEditOpen(false)}
                 >
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Kurs</th>
+                            <th>Lernender</th>
+                            <th>Note</th>
+                            <th style={{ textAlign: "right" }}>Aktionen</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {data.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} style={{ textAlign: "center", color: "#64748b" }}>
+                                    Keine Einträge
+                                </td>
+                            </tr>
+                        ) : (
+                            data.map((p) => (
+                                <tr key={p.id_kurse_lernende}>
+                                    <td style={{ fontWeight: 500 }}>{p.kursthema ?? "-"}</td>
+                                    <td>{p.lernender_name ?? "-"}</td>
+                                    <td>{p.note ?? "-"}</td>
+                                    <td>
+                                        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+                                            <button
+                                                onClick={() => handleEdit(p)}
+                                                style={{
+                                                    padding: "0.5rem",
+                                                    background: "#f8fafc",
+                                                    color: "#3b82f6",
+                                                    border: "1px solid #e2e8f0",
+                                                }}
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(p)}
+                                                style={{
+                                                    padding: "0.5rem",
+                                                    background: "#fef2f2",
+                                                    color: "#ef4444",
+                                                    border: "1px solid #fee",
+                                                }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Modal */}
+            {editOpen && (
+                <div className="modal-overlay" onClick={() => setEditOpen(false)}>
                     <div
-                        style={{
-                            background: "white",
-                            padding: "2rem",
-                            width: "600px",
-                        }}
+                        className="modal-content"
+                        style={{ maxWidth: "600px", width: "90%" }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h2>
-                            {editItem
-                                ? "Eintrag bearbeiten"
-                                : "Neuer Kurse–Lernende Eintrag"}
+                        <h2 style={{ marginBottom: "1.5rem" }}>
+                            {editItem ? "Eintrag bearbeiten" : "Neuer Kurse–Lernende Eintrag"}
                         </h2>
 
-                        <div style={{ marginTop: "1rem" }}>
+                        <div style={{ display: "grid", gap: "1rem" }}>
                             {[
                                 ["nr_kurs", "Kurs ID"],
                                 ["nr_lernende", "Lernende ID"],
                                 ["note", "Note"],
                             ].map(([k, label]) => (
-                                <label
-                                    key={k}
-                                    style={{
-                                        display: "block",
-                                        marginTop: "0.75rem",
-                                    }}
-                                >
+                                <label key={k}>
                                     {label}
                                     <input
                                         type={k === "note" ? "number" : "text"}
                                         step={k === "note" ? "0.1" : undefined}
-                                        style={{
-                                            width: "100%",
-                                            padding: "0.5rem",
-                                            marginTop: "0.25rem",
-                                        }}
                                         value={(editForm as any)[k] ?? ""}
                                         onChange={(e) =>
-                                            setEditForm((f) => ({
-                                                ...f,
-                                                [k]: e.target.value,
-                                            }))
+                                            setEditForm((f) => ({ ...f, [k]: e.target.value }))
                                         }
                                     />
                                 </label>
@@ -307,13 +259,16 @@ export default function KurseLernendePage() {
 
                         <div
                             style={{
-                                marginTop: "1.5rem",
                                 display: "flex",
-                                justifyContent: "flex-end",
                                 gap: "0.5rem",
+                                justifyContent: "flex-end",
+                                marginTop: "1.5rem",
                             }}
                         >
-                            <button onClick={() => setEditOpen(false)}>
+                            <button
+                                onClick={() => setEditOpen(false)}
+                                style={{ background: "white", color: "#64748b", border: "1px solid #e2e8f0" }}
+                            >
                                 Abbrechen
                             </button>
                             <button onClick={handleSave}>Speichern</button>
@@ -321,6 +276,6 @@ export default function KurseLernendePage() {
                     </div>
                 </div>
             )}
-        </main>
+        </div>
     );
 }

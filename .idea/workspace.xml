@@ -4,16 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="implement CRUD for all pages">
+      <change afterPath="$PROJECT_DIR$/joins.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/laender/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/laender/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/lehrbetriebe-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lehrbetriebe-lernende/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/lehrbetriebe/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lehrbetriebe/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,6 +27,13 @@
   </component>
   <component name="ComposerSettings">
     <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="PHP File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -82,11 +94,35 @@
       <option name="presentableId" value="Default" />
       <updated>1763374041065</updated>
       <workItem from="1763374044970" duration="29000" />
-      <workItem from="1768461283409" duration="9818000" />
+      <workItem from="1768461283409" duration="23515000" />
     </task>
+    <task id="LOCAL-00001" summary="implement CRUD for all pages">
+      <option name="closed" value="true" />
+      <created>1768472625862</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1768472625862</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="implement CRUD for all pages" />
+    <option name="LAST_COMMIT_MESSAGE" value="implement CRUD for all pages" />
   </component>
 </project>

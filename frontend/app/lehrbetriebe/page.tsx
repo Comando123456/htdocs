@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
 type Lehrbetrieb = {
     id_lehrbetrieb?: number;
@@ -28,13 +29,9 @@ export default function LehrbetriebePage() {
         setError(null);
         try {
             const resp = await fetch(API_BASE_URL + "/lehrbetriebe.php?all");
-            if (!resp.ok) {
-                throw new Error(`HTTP ${resp.status}`);
-            }
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const json = await resp.json();
-            if (!Array.isArray(json)) {
-                throw new Error("Unerwartetes Antwortformat");
-            }
+            if (!Array.isArray(json)) throw new Error("Unerwartetes Antwortformat");
             setData(json);
         } catch (e: any) {
             setError(e?.message ?? "Fehler beim Laden");
@@ -46,12 +43,7 @@ export default function LehrbetriebePage() {
 
     const handleNew = () => {
         setEditItem(null);
-        setEditForm({
-            firma: "",
-            strasse: "",
-            plz: "",
-            ort: "",
-        });
+        setEditForm({ firma: "", strasse: "", plz: "", ort: "" });
         setEditOpen(true);
     };
 
@@ -76,21 +68,16 @@ export default function LehrbetriebePage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(
                     isEdit
-                        ? {
-                            id_lehrbetrieb: editItem!.id_lehrbetrieb,
-                            ...editForm,
-                        }
+                        ? { id_lehrbetrieb: editItem!.id_lehrbetrieb, ...editForm }
                         : editForm
                 ),
             });
 
             const text = await resp.text();
-            if (!resp.ok) {
-                throw new Error(text);
-            }
+            if (!resp.ok) throw new Error(text);
 
             await fetchData();
-        } catch (e) {
+        } catch {
             alert("Speichern fehlgeschlagen");
         } finally {
             setEditItem(null);
@@ -98,254 +85,199 @@ export default function LehrbetriebePage() {
     };
 
     const handleDelete = async (p: Lehrbetrieb) => {
-        if (!p.id_lehrbetrieb) {
-            alert("Keine gültige ID");
-            return;
-        }
-
+        if (!p.id_lehrbetrieb) return;
         if (!confirm(`Lehrbetrieb "${p.firma}" löschen?`)) return;
 
         try {
             const resp = await fetch(
-                API_BASE_URL +
-                "/lehrbetriebe.php?id_lehrbetrieb=" +
-                encodeURIComponent(String(p.id_lehrbetrieb)),
+                `${API_BASE_URL}/lehrbetriebe.php?id_lehrbetrieb=${encodeURIComponent(
+                    String(p.id_lehrbetrieb)
+                )}`,
                 { method: "DELETE" }
             );
 
             const text = await resp.text();
-            if (!resp.ok) {
-                throw new Error(text);
-            }
+            if (!resp.ok) throw new Error(text);
 
             await fetchData();
-        } catch (e) {
+        } catch {
             alert("Löschen fehlgeschlagen");
         }
     };
 
     return (
-        <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-            <h1>Kursverwaltung – Lehrbetriebe</h1>
-
-            <div style={{ margin: "1rem 0" }}>
-                <button
-                    onClick={() => window.history.back()}
-                    style={{ marginRight: "0.5rem" }}
-                >
-                    Zurück
-                </button>
-                <button onClick={handleNew}>Neuer Lehrbetrieb</button>
-            </div>
-
-            {loading && <p>Lade Daten …</p>}
-            {error && <p style={{ color: "crimson" }}>{error}</p>}
-
-            <table
-                style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    marginTop: "1rem",
-                }}
-            >
-                <caption
-                    style={{
-                        textAlign: "left",
-                        marginBottom: "0.5rem",
-                        fontWeight: 600,
-                    }}
-                >
-                    Lehrbetriebe Übersicht
-                </caption>
-                <thead>
-                <tr>
-                    <th
-                        style={{
-                            border: "1px solid #ccc",
-                            padding: "0.5rem",
-                            textAlign: "left",
-                        }}
-                    >
-                        Firma
-                    </th>
-                    <th
-                        style={{
-                            border: "1px solid #ccc",
-                            padding: "0.5rem",
-                            textAlign: "left",
-                        }}
-                    >
-                        Strasse
-                    </th>
-                    <th
-                        style={{
-                            border: "1px solid #ccc",
-                            padding: "0.5rem",
-                            textAlign: "left",
-                        }}
-                    >
-                        PLZ
-                    </th>
-                    <th
-                        style={{
-                            border: "1px solid #ccc",
-                            padding: "0.5rem",
-                            textAlign: "left",
-                        }}
-                    >
-                        Ort
-                    </th>
-                    <th
-                        style={{
-                            border: "1px solid #ccc",
-                            padding: "0.5rem",
-                            textAlign: "left",
-                        }}
-                    >
-                        Aktionen
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {!data || data.length === 0 ? (
-                    <tr>
-                        <td
-                            colSpan={5}
+        <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
+            {/* Header */}
+            <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "2rem 0" }}>
+                <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+                        <button
+                            onClick={() => window.history.back()}
                             style={{
-                                border: "1px solid #ccc",
-                                padding: "0.5rem",
+                                background: "white",
+                                color: "#64748b",
+                                border: "1px solid #e2e8f0",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
                             }}
                         >
-                            Keine Einträge vorhanden.
-                        </td>
-                    </tr>
-                ) : (
-                    data.map((p) => (
-                        <tr key={p.id_lehrbetrieb}>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                {p.firma ?? "-"}
-                            </td>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                {p.strasse ?? "-"}
-                            </td>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                {p.plz ?? "-"}
-                            </td>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                {p.ort ?? "-"}
-                            </td>
-                            <td
-                                style={{
-                                    border: "1px solid #ccc",
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                <button
-                                    style={{
-                                        marginRight: "0.5rem",
-                                        padding: "0.25rem 0.5rem",
-                                        cursor: "pointer",
-                                    }}
-                                    onClick={() => handleEdit(p)}
-                                >
-                                    Bearbeiten
-                                </button>
-                                <button
-                                    style={{
-                                        padding: "0.25rem 0.5rem",
-                                        cursor: "pointer",
-                                    }}
-                                    onClick={() => handleDelete(p)}
-                                >
-                                    Löschen
-                                </button>
-                            </td>
-                        </tr>
-                    ))
-                )}
-                </tbody>
-            </table>
+                            <ArrowLeft size={18} /> Zurück
+                        </button>
+                    </div>
 
-            {editOpen && (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                            <h1 style={{ fontSize: "2rem", fontWeight: 700, color: "#0f172a" }}>
+                                Lehrbetriebe
+                            </h1>
+                            <p style={{ color: "#64748b" }}>Verwaltung aller Lehrbetriebe</p>
+                        </div>
+                        <button
+                            onClick={handleNew}
+                            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+                        >
+                            <Plus size={18} /> Neuer Lehrbetrieb
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Content */}
+            <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {loading && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b" }}>
+                        <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
+                        Lade Daten…
+                    </div>
+                )}
+
+                {error && (
+                    <div style={{ padding: "1rem", background: "#fee", color: "#c00", borderRadius: "0.5rem" }}>
+                        {error}
+                    </div>
+                )}
+
                 <div
                     style={{
-                        position: "fixed",
-                        inset: 0,
-                        background: "rgba(0,0,0,0.4)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        zIndex: 1000,
+                        background: "white",
+                        borderRadius: "0.75rem",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                        overflow: "hidden",
                     }}
-                    onClick={() => setEditOpen(false)}
                 >
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Firma</th>
+                            <th>Strasse</th>
+                            <th>PLZ</th>
+                            <th>Ort</th>
+                            <th style={{ textAlign: "right" }}>Aktionen</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {!data || data.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} style={{ textAlign: "center", color: "#64748b" }}>
+                                    Keine Einträge
+                                </td>
+                            </tr>
+                        ) : (
+                            data.map((p) => (
+                                <tr key={p.id_lehrbetrieb}>
+                                    <td style={{ fontWeight: 500 }}>{p.firma ?? "-"}</td>
+                                    <td>{p.strasse ?? "-"}</td>
+                                    <td>{p.plz ?? "-"}</td>
+                                    <td>{p.ort ?? "-"}</td>
+                                    <td>
+                                        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+                                            <button
+                                                onClick={() => handleEdit(p)}
+                                                style={{
+                                                    padding: "0.5rem",
+                                                    background: "#f8fafc",
+                                                    color: "#3b82f6",
+                                                    border: "1px solid #e2e8f0",
+                                                }}
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(p)}
+                                                style={{
+                                                    padding: "0.5rem",
+                                                    background: "#fef2f2",
+                                                    color: "#ef4444",
+                                                    border: "1px solid #fee",
+                                                }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Modal */}
+            {editOpen && (
+                <div className="modal-overlay" onClick={() => setEditOpen(false)}>
                     <div
-                        style={{
-                            background: "white",
-                            padding: "2rem",
-                            width: "600px",
-                        }}
+                        className="modal-content"
+                        style={{ maxWidth: "600px", width: "90%" }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h2>{editItem ? "Bearbeiten" : "Neu"}</h2>
+                        <h2 style={{ marginBottom: "1.5rem" }}>
+                            {editItem ? "Lehrbetrieb bearbeiten" : "Neuer Lehrbetrieb"}
+                        </h2>
 
-                        {[
-                            ["firma", "Firma *"],
-                            ["strasse", "Strasse"],
-                            ["plz", "PLZ"],
-                            ["ort", "Ort"],
-                        ].map(([key, label]) => (
-                            <label
-                                key={key}
-                                style={{ display: "block", marginTop: "0.75rem" }}
-                            >
-                                {label}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }}>
+                            <label style={{ gridColumn: "1 / -1" }}>
+                                Firma *
                                 <input
-                                    style={{
-                                        width: "100%",
-                                        padding: "0.5rem",
-                                        marginTop: "0.25rem",
-                                    }}
-                                    value={(editForm as any)[key] ?? ""}
-                                    onChange={(e) =>
-                                        setEditForm((f) => ({
-                                            ...f,
-                                            [key]: e.target.value,
-                                        }))
-                                    }
+                                    value={editForm.firma ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, firma: e.target.value })}
                                 />
                             </label>
-                        ))}
+                            <label>
+                                Strasse
+                                <input
+                                    value={editForm.strasse ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, strasse: e.target.value })}
+                                />
+                            </label>
+                            <label>
+                                PLZ
+                                <input
+                                    value={editForm.plz ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, plz: e.target.value })}
+                                />
+                            </label>
+                            <label style={{ gridColumn: "1 / -1" }}>
+                                Ort
+                                <input
+                                    value={editForm.ort ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, ort: e.target.value })}
+                                />
+                            </label>
+                        </div>
 
                         <div
                             style={{
+                                display: "flex",
+                                gap: "0.5rem",
+                                justifyContent: "flex-end",
                                 marginTop: "1.5rem",
-                                textAlign: "right",
                             }}
                         >
                             <button
                                 onClick={() => setEditOpen(false)}
-                                style={{ marginRight: "0.5rem" }}
+                                style={{ background: "white", color: "#64748b", border: "1px solid #e2e8f0" }}
                             >
                                 Abbrechen
                             </button>
@@ -354,6 +286,6 @@ export default function LehrbetriebePage() {
                     </div>
                 </div>
             )}
-        </main>
+        </div>
     );
 }

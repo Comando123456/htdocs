@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
 type Kurs = {
     id_kurs?: number;
@@ -10,10 +11,11 @@ type Kurs = {
     startdatum?: string;
     enddatum?: string;
     dauer?: number | string;
+    dozent_name?: string; // JOIN
 };
 
 export default function KursePage() {
-    const [data, setData] = useState<Kurs[] | null>(null);
+    const [data, setData] = useState<Kurs[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [editOpen, setEditOpen] = useState(false);
@@ -30,7 +32,7 @@ export default function KursePage() {
         setLoading(true);
         setError(null);
         try {
-            const resp = await fetch(API_BASE_URL + "/kurse.php?all");
+            const resp = await fetch(API_BASE_URL + "/joins.php?type=kurse");
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const json = await resp.json();
             if (!Array.isArray(json)) throw new Error("Unerwartetes Antwortformat");
@@ -98,18 +100,17 @@ export default function KursePage() {
     };
 
     const handleDelete = async (p: Kurs) => {
-        if (!p.id_kurs) {
-            alert("Keine gültige ID");
+        if (!p.id_kurs) return;
+        if (
+            !confirm(`Kurs löschen?\n${p.kursthema}\nDozent: ${p.dozent_name}`)
+        )
             return;
-        }
-
-        if (!confirm(`Kurs "${p.kursthema}" löschen?`)) return;
 
         try {
             const resp = await fetch(
-                API_BASE_URL +
-                "/kurse.php?id_kurs=" +
-                encodeURIComponent(String(p.id_kurs)),
+                `${API_BASE_URL}/kurse.php?id_kurs=${encodeURIComponent(
+                    String(p.id_kurs)
+                )}`,
                 { method: "DELETE" }
             );
 
@@ -123,176 +124,263 @@ export default function KursePage() {
     };
 
     return (
-        <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-            <h1>Kursverwaltung – Kurse</h1>
-
-            <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-                <button
-                    onClick={() => window.history.back()}
-                    style={{ marginRight: "0.5rem", padding: "0.5rem 1rem" }}
-                >
-                    Zurück
-                </button>
-                <button
-                    onClick={handleNew}
-                    style={{ padding: "0.5rem 1rem" }}
-                >
-                    Neuer Kurs
-                </button>
-            </div>
-
-            {loading && <p>Lade Daten …</p>}
-            {error && <p style={{ color: "crimson" }}>Fehler: {error}</p>}
-
-            <table
+        <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
+            {/* Header */}
+            <header
                 style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    marginTop: "1rem",
+                    background: "white",
+                    borderBottom: "1px solid #e2e8f0",
+                    padding: "2rem 0",
                 }}
             >
-                <caption
-                    style={{
-                        textAlign: "left",
-                        marginBottom: "0.5rem",
-                        fontWeight: 600,
-                    }}
-                >
-                    Kurse Übersicht
-                </caption>
-                <thead>
-                <tr>
-                    {[
-                        "Kursnr.",
-                        "Thema",
-                        "Dozent (ID)",
-                        "Start",
-                        "Ende",
-                        "Dauer",
-                        "Aktionen",
-                    ].map((h) => (
-                        <th
-                            key={h}
-                            style={{
-                                border: "1px solid #ccc",
-                                padding: "0.5rem",
-                                textAlign: "left",
-                            }}
-                        >
-                            {h}
-                        </th>
-                    ))}
-                </tr>
-                </thead>
-                <tbody>
-                {!data || data.length === 0 ? (
-                    <tr>
-                        <td
-                            colSpan={7}
-                            style={{
-                                border: "1px solid #ccc",
-                                padding: "0.5rem",
-                            }}
-                        >
-                            Keine Einträge vorhanden.
-                        </td>
-                    </tr>
-                ) : (
-                    data.map((p) => (
-                        <tr key={p.id_kurs}>
-                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                                {p.kursnummer ?? "-"}
-                            </td>
-                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                                {p.kursthema ?? "-"}
-                            </td>
-                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                                {p.nr_dozent ?? "-"}
-                            </td>
-                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                                {p.startdatum ?? "-"}
-                            </td>
-                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                                {p.enddatum ?? "-"}
-                            </td>
-                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                                {p.dauer ?? "-"}
-                            </td>
-                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                                <button
-                                    style={{
-                                        marginRight: "0.5rem",
-                                        padding: "0.25rem 0.5rem",
-                                    }}
-                                    onClick={() => handleEdit(p)}
-                                >
-                                    Bearbeiten
-                                </button>
-                                <button
-                                    style={{ padding: "0.25rem 0.5rem" }}
-                                    onClick={() => handleDelete(p)}
-                                >
-                                    Löschen
-                                </button>
-                            </td>
-                        </tr>
-                    ))
-                )}
-                </tbody>
-            </table>
-
-            {editOpen && (
-                <div
-                    style={{
-                        position: "fixed",
-                        inset: 0,
-                        background: "rgba(0,0,0,0.4)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                    onClick={() => setEditOpen(false)}
-                >
+                <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
                     <div
-                        style={{ background: "white", padding: "2rem", width: 700 }}
-                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "1rem",
+                            marginBottom: "1rem",
+                        }}
                     >
-                        <h2>{editItem ? "Kurs bearbeiten" : "Neuer Kurs"}</h2>
-
-                        {[
-                            ["kursnummer", "Kursnummer"],
-                            ["kursthema", "Kursthema"],
-                            ["inhalt", "Inhalt"],
-                            ["nr_dozent", "Dozent (ID)"],
-                            ["startdatum", "Startdatum"],
-                            ["enddatum", "Enddatum"],
-                            ["dauer", "Dauer (h)"],
-                        ].map(([k, label]) => (
-                            <label key={k} style={{ display: "block", marginTop: "0.75rem" }}>
-                                {label}
-                                <input
-                                    type={k.includes("datum") ? "date" : "text"}
-                                    style={{ width: "100%", padding: "0.5rem" }}
-                                    value={(editForm as any)[k] ?? ""}
-                                    onChange={(e) =>
-                                        setEditForm((f) => ({
-                                            ...f,
-                                            [k]: e.target.value,
-                                        }))
-                                    }
-                                />
-                            </label>
-                        ))}
-
-                        <div
+                        <button
+                            onClick={() => window.history.back()}
                             style={{
-                                marginTop: "1.5rem",
+                                background: "white",
+                                color: "#64748b",
+                                border: "1px solid #e2e8f0",
                                 display: "flex",
-                                justifyContent: "flex-end",
+                                alignItems: "center",
                                 gap: "0.5rem",
                             }}
                         >
-                            <button onClick={() => setEditOpen(false)}>
+                            <ArrowLeft size={18} /> Zurück
+                        </button>
+                    </div>
+
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        <div>
+                            <h1
+                                style={{
+                                    fontSize: "2rem",
+                                    fontWeight: 700,
+                                    color: "#0f172a",
+                                }}
+                            >
+                                Kurse
+                            </h1>
+                            <p style={{ color: "#64748b" }}>
+                                Verwaltung aller Kurse
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleNew}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                            }}
+                        >
+                            <Plus size={18} /> Neuer Kurs
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Content */}
+            <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {loading && (
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            color: "#64748b",
+                        }}
+                    >
+                        <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
+                        Lade Daten…
+                    </div>
+                )}
+
+                {error && (
+                    <div
+                        style={{
+                            padding: "1rem",
+                            background: "#fee",
+                            color: "#c00",
+                            borderRadius: "0.5rem",
+                        }}
+                    >
+                        {error}
+                    </div>
+                )}
+
+                <div
+                    style={{
+                        background: "white",
+                        borderRadius: "0.75rem",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                        overflow: "hidden",
+                    }}
+                >
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Kursnr.</th>
+                            <th>Thema</th>
+                            <th>Dozent</th>
+                            <th>Start</th>
+                            <th>Ende</th>
+                            <th>Dauer</th>
+                            <th style={{ textAlign: "right" }}>Aktionen</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {data.length === 0 ? (
+                            <tr>
+                                <td colSpan={7} style={{ textAlign: "center", color: "#64748b" }}>
+                                    Keine Einträge
+                                </td>
+                            </tr>
+                        ) : (
+                            data.map((p) => (
+                                <tr key={p.id_kurs}>
+                                    <td style={{ fontWeight: 500 }}>{p.kursnummer ?? "-"}</td>
+                                    <td>{p.kursthema ?? "-"}</td>
+                                    <td>{p.dozent_name ?? "-"}</td>
+                                    <td>{p.startdatum ?? "-"}</td>
+                                    <td>{p.enddatum ?? "-"}</td>
+                                    <td>{p.dauer ?? "-"}</td>
+                                    <td>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                gap: "0.5rem",
+                                                justifyContent: "flex-end",
+                                            }}
+                                        >
+                                            <button
+                                                onClick={() => handleEdit(p)}
+                                                style={{
+                                                    padding: "0.5rem",
+                                                    background: "#f8fafc",
+                                                    color: "#3b82f6",
+                                                    border: "1px solid #e2e8f0",
+                                                }}
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(p)}
+                                                style={{
+                                                    padding: "0.5rem",
+                                                    background: "#fef2f2",
+                                                    color: "#ef4444",
+                                                    border: "1px solid #fee",
+                                                }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Modal */}
+            {editOpen && (
+                <div className="modal-overlay" onClick={() => setEditOpen(false)}>
+                    <div
+                        className="modal-content"
+                        style={{ maxWidth: "800px", width: "90%" }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 style={{ marginBottom: "1.5rem" }}>
+                            {editItem ? "Kurs bearbeiten" : "Neuer Kurs"}
+                        </h2>
+
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(2, 1fr)",
+                                gap: "1rem",
+                            }}
+                        >
+                            {[
+                                ["kursnummer", "Kursnummer"],
+                                ["kursthema", "Kursthema"],
+                                ["nr_dozent", "Dozent ID"],
+                                ["dauer", "Dauer (h)"],
+                            ].map(([k, label]) => (
+                                <label key={k}>
+                                    {label}
+                                    <input
+                                        value={(editForm as any)[k] ?? ""}
+                                        onChange={(e) =>
+                                            setEditForm((f) => ({ ...f, [k]: e.target.value }))
+                                        }
+                                    />
+                                </label>
+                            ))}
+
+                            <label style={{ gridColumn: "1 / -1" }}>
+                                Inhalt
+                                <input
+                                    value={editForm.inhalt ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, inhalt: e.target.value })
+                                    }
+                                />
+                            </label>
+
+                            <label>
+                                Startdatum
+                                <input
+                                    type="date"
+                                    value={editForm.startdatum ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, startdatum: e.target.value })
+                                    }
+                                />
+                            </label>
+                            <label>
+                                Enddatum
+                                <input
+                                    type="date"
+                                    value={editForm.enddatum ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, enddatum: e.target.value })
+                                    }
+                                />
+                            </label>
+                        </div>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: "0.5rem",
+                                justifyContent: "flex-end",
+                                marginTop: "1.5rem",
+                            }}
+                        >
+                            <button
+                                onClick={() => setEditOpen(false)}
+                                style={{
+                                    background: "white",
+                                    color: "#64748b",
+                                    border: "1px solid #e2e8f0",
+                                }}
+                            >
                                 Abbrechen
                             </button>
                             <button onClick={handleSave}>Speichern</button>
@@ -300,6 +388,6 @@ export default function KursePage() {
                     </div>
                 </div>
             )}
-        </main>
+        </div>
     );
 }
