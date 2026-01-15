@@ -1,7 +1,324 @@
+"use client";
+import React, { useEffect, useState } from "react";
+
+type LehrbetriebLernender = {
+    id_lehrbetriebe_lernende?: number;
+    nr_lehrbetrieb?: number | string;
+    nr_lernende?: number | string;
+    start?: string;
+    ende?: string;
+    beruf?: string;
+};
+
 export default function LehrbetriebeLernendePage() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold">Welcome to the Lehrbetriebe-Lernende Page</h1>
-    </main>
-  );
+    const [data, setData] = useState<LehrbetriebLernender[] | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [editOpen, setEditOpen] = useState(false);
+    const [editItem, setEditItem] = useState<LehrbetriebLernender | null>(null);
+    const [editForm, setEditForm] = useState<Partial<LehrbetriebLernender>>({});
+
+    const API_BASE_URL = "http://localhost";
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const resp = await fetch(API_BASE_URL + "/lehrbetriebe_lernende.php?all");
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const json = await resp.json();
+            if (!Array.isArray(json)) throw new Error("Unerwartetes Antwortformat");
+            setData(json);
+        } catch (e: any) {
+            setError(e?.message ?? "Fehler beim Laden");
+            setData([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleNew = () => {
+        setEditItem(null);
+        setEditForm({
+            nr_lehrbetrieb: "",
+            nr_lernende: "",
+            start: "",
+            ende: "",
+            beruf: "",
+        });
+        setEditOpen(true);
+    };
+
+    const handleEdit = (p: LehrbetriebLernender) => {
+        setEditItem(p);
+        setEditForm({
+            nr_lehrbetrieb: p.nr_lehrbetrieb ?? "",
+            nr_lernende: p.nr_lernende ?? "",
+            start: p.start ?? "",
+            ende: p.ende ?? "",
+            beruf: p.beruf ?? "",
+        });
+        setEditOpen(true);
+    };
+
+    const handleSave = async () => {
+        const isEdit = !!editItem;
+        setEditOpen(false);
+
+        try {
+            const resp = await fetch(API_BASE_URL + "/lehrbetriebe_lernende.php", {
+                method: isEdit ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(
+                    isEdit
+                        ? {
+                            id_lehrbetriebe_lernende:
+                            editItem!.id_lehrbetriebe_lernende,
+                            ...editForm,
+                        }
+                        : editForm
+                ),
+            });
+
+            const text = await resp.text();
+            if (!resp.ok) throw new Error(text);
+
+            await fetchData();
+        } catch {
+            alert("Speichern fehlgeschlagen");
+        } finally {
+            setEditItem(null);
+        }
+    };
+
+    const handleDelete = async (p: LehrbetriebLernender) => {
+        if (!p.id_lehrbetriebe_lernende) {
+            alert("Keine gültige ID");
+            return;
+        }
+
+        if (
+            !confirm(
+                `Eintrag löschen? (Lehrbetrieb ${p.nr_lehrbetrieb}, Lernender ${p.nr_lernende})`
+            )
+        )
+            return;
+
+        try {
+            const resp = await fetch(
+                API_BASE_URL +
+                "/lehrbetriebe_lernende.php?id_lehrbetriebe_lernende=" +
+                encodeURIComponent(String(p.id_lehrbetriebe_lernende)),
+                { method: "DELETE" }
+            );
+
+            const text = await resp.text();
+            if (!resp.ok) throw new Error(text);
+
+            await fetchData();
+        } catch {
+            alert("Löschen fehlgeschlagen");
+        }
+    };
+
+    return (
+        <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+            <h1>Kursverwaltung – Lehrbetriebe–Lernende</h1>
+
+            <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+                <button
+                    onClick={() => window.history.back()}
+                    style={{ marginRight: "0.5rem", padding: "0.5rem 1rem" }}
+                >
+                    Zurück
+                </button>
+                <button
+                    onClick={handleNew}
+                    style={{ padding: "0.5rem 1rem" }}
+                >
+                    Neuer Eintrag
+                </button>
+            </div>
+
+            {loading && <p>Lade Daten …</p>}
+            {error && <p style={{ color: "crimson" }}>Fehler: {error}</p>}
+
+            <table
+                style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    marginTop: "1rem",
+                }}
+            >
+                <caption
+                    style={{
+                        textAlign: "left",
+                        marginBottom: "0.5rem",
+                        fontWeight: 600,
+                    }}
+                >
+                    Lehrbetriebe–Lernende Übersicht
+                </caption>
+                <thead>
+                <tr>
+                    {[
+                        "Lehrbetrieb ID",
+                        "Lernende ID",
+                        "Start",
+                        "Ende",
+                        "Beruf",
+                        "Aktionen",
+                    ].map((h) => (
+                        <th
+                            key={h}
+                            style={{
+                                border: "1px solid #ccc",
+                                padding: "0.5rem",
+                                textAlign: "left",
+                            }}
+                        >
+                            {h}
+                        </th>
+                    ))}
+                </tr>
+                </thead>
+                <tbody>
+                {!data || data.length === 0 ? (
+                    <tr>
+                        <td
+                            colSpan={6}
+                            style={{
+                                border: "1px solid #ccc",
+                                padding: "0.5rem",
+                            }}
+                        >
+                            Keine Einträge vorhanden.
+                        </td>
+                    </tr>
+                ) : (
+                    data.map((p) => (
+                        <tr key={p.id_lehrbetriebe_lernende}>
+                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
+                                {p.nr_lehrbetrieb ?? "-"}
+                            </td>
+                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
+                                {p.nr_lernende ?? "-"}
+                            </td>
+                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
+                                {p.start ?? "-"}
+                            </td>
+                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
+                                {p.ende ?? "-"}
+                            </td>
+                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
+                                {p.beruf ?? "-"}
+                            </td>
+                            <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
+                                <button
+                                    style={{
+                                        marginRight: "0.5rem",
+                                        padding: "0.25rem 0.5rem",
+                                    }}
+                                    onClick={() => handleEdit(p)}
+                                >
+                                    Bearbeiten
+                                </button>
+                                <button
+                                    style={{ padding: "0.25rem 0.5rem" }}
+                                    onClick={() => handleDelete(p)}
+                                >
+                                    Löschen
+                                </button>
+                            </td>
+                        </tr>
+                    ))
+                )}
+                </tbody>
+            </table>
+
+            {editOpen && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        background: "rgba(0,0,0,0.4)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1000,
+                    }}
+                    onClick={() => setEditOpen(false)}
+                >
+                    <div
+                        style={{
+                            background: "white",
+                            padding: "2rem",
+                            width: "650px",
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2>
+                            {editItem
+                                ? "Eintrag bearbeiten"
+                                : "Neuer Lehrbetriebe–Lernende Eintrag"}
+                        </h2>
+
+                        <div style={{ marginTop: "1rem" }}>
+                            {[
+                                ["nr_lehrbetrieb", "Lehrbetrieb ID"],
+                                ["nr_lernende", "Lernende ID"],
+                                ["start", "Startdatum"],
+                                ["ende", "Enddatum"],
+                                ["beruf", "Beruf"],
+                            ].map(([k, label]) => (
+                                <label
+                                    key={k}
+                                    style={{ display: "block", marginTop: "0.75rem" }}
+                                >
+                                    {label}
+                                    <input
+                                        type={
+                                            k === "start" || k === "ende"
+                                                ? "date"
+                                                : "text"
+                                        }
+                                        style={{
+                                            width: "100%",
+                                            padding: "0.5rem",
+                                            marginTop: "0.25rem",
+                                        }}
+                                        value={(editForm as any)[k] ?? ""}
+                                        onChange={(e) =>
+                                            setEditForm((f) => ({
+                                                ...f,
+                                                [k]: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                </label>
+                            ))}
+                        </div>
+
+                        <div
+                            style={{
+                                marginTop: "1.5rem",
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: "0.5rem",
+                            }}
+                        >
+                            <button onClick={() => setEditOpen(false)}>
+                                Abbrechen
+                            </button>
+                            <button onClick={handleSave}>Speichern</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </main>
+    );
 }

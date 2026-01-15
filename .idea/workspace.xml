@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="" />
+    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/laender/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/laender/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lehrbetriebe-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lehrbetriebe-lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lehrbetriebe/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lehrbetriebe/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,22 +26,22 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Comando123456"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Comando123456&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Comando123456/htdocs.git",
-    "accountId": "0d305d74-c183-4d31-ac50-f63c5d20f827"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Comando123456/htdocs.git&quot;,
+    &quot;accountId&quot;: &quot;0d305d74-c183-4d31-ac50-f63c5d20f827&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 7
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="35bLsyJ7xb9kF4n0tgWxrNlvqio" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -38,8 +51,18 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/xampp/htdocs",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\xampp\\htdocs\\frontend\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -59,7 +82,11 @@
       <option name="presentableId" value="Default" />
       <updated>1763374041065</updated>
       <workItem from="1763374044970" duration="29000" />
+      <workItem from="1768461283409" duration="9818000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>
