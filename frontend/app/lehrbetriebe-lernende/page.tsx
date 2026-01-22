@@ -13,8 +13,21 @@ type LehrbetriebLernender = {
     lernender_name?: string;
 };
 
+type Lehrbetrieb = {
+    id_lehrbetrieb: number;
+    firma: string;
+};
+
+type Lernender = {
+    id_lernende: number;
+    vorname: string;
+    nachname: string;
+};
+
 export default function LehrbetriebeLernendePage() {
     const [data, setData] = useState<LehrbetriebLernender[]>([]);
+    const [lehrbetriebe, setLehrbetriebe] = useState<Lehrbetrieb[]>([]);
+    const [lernende, setLernende] = useState<Lernender[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [editOpen, setEditOpen] = useState(false);
@@ -25,7 +38,35 @@ export default function LehrbetriebeLernendePage() {
 
     useEffect(() => {
         fetchData();
+        fetchLehrbetriebe();
+        fetchLernende();
     }, []);
+
+    const fetchLehrbetriebe = async () => {
+        try {
+            const resp = await fetch(API_BASE_URL + "/lehrbetriebe.php?all");
+            if (!resp.ok) throw new Error("Fehler beim Laden der Lehrbetriebe");
+            const json = await resp.json();
+            if (Array.isArray(json)) {
+                setLehrbetriebe(json);
+            }
+        } catch (e) {
+            console.error("Fehler beim Laden der Lehrbetriebe:", e);
+        }
+    };
+
+    const fetchLernende = async () => {
+        try {
+            const resp = await fetch(API_BASE_URL + "/lernende.php?all");
+            if (!resp.ok) throw new Error("Fehler beim Laden der Lernenden");
+            const json = await resp.json();
+            if (Array.isArray(json)) {
+                setLernende(json);
+            }
+        } catch (e) {
+            console.error("Fehler beim Laden der Lernenden:", e);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -264,31 +305,72 @@ export default function LehrbetriebeLernendePage() {
                         </h2>
 
                         <div style={{ display: "grid", gap: "1rem" }}>
-                            {[
-                                ["nr_lehrbetrieb", "Lehrbetrieb ID"],
-                                ["nr_lernende", "Lernende ID"],
-                                ["start", "Startdatum"],
-                                ["ende", "Enddatum"],
-                                ["beruf", "Beruf"],
-                            ].map(([k, label]) => (
-                                <label key={k}>
-                                    {label}
-                                    <input
-                                        type={
-                                            k === "start" || k === "ende"
-                                                ? "date"
-                                                : "text"
-                                        }
-                                        value={(editForm as any)[k] ?? ""}
-                                        onChange={(e) =>
-                                            setEditForm((f) => ({
-                                                ...f,
-                                                [k]: e.target.value,
-                                            }))
-                                        }
-                                    />
-                                </label>
-                            ))}
+                            <label>
+                                Lehrbetrieb
+                                <select
+                                    value={editForm.nr_lehrbetrieb ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, nr_lehrbetrieb: e.target.value })
+                                    }
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    {lehrbetriebe.map((betrieb) => (
+                                        <option key={betrieb.id_lehrbetrieb} value={betrieb.id_lehrbetrieb}>
+                                            {betrieb.firma}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Lernender
+                                <select
+                                    value={editForm.nr_lernende ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, nr_lernende: e.target.value })
+                                    }
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    {lernende.map((lernender) => (
+                                        <option key={lernender.id_lernende} value={lernender.id_lernende}>
+                                            {lernender.vorname} {lernender.nachname}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Startdatum
+                                <input
+                                    type="date"
+                                    value={editForm.start ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, start: e.target.value })
+                                    }
+                                />
+                            </label>
+
+                            <label>
+                                Enddatum
+                                <input
+                                    type="date"
+                                    value={editForm.ende ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, ende: e.target.value })
+                                    }
+                                />
+                            </label>
+
+                            <label>
+                                Beruf
+                                <input
+                                    type="text"
+                                    value={editForm.beruf ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, beruf: e.target.value })
+                                    }
+                                />
+                            </label>
                         </div>
 
                         <div

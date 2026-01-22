@@ -11,8 +11,22 @@ type KursLernender = {
     lernender_name?: string;
 };
 
+type Kurs = {
+    id_kurs: number;
+    kursnummer: string;
+    kursthema: string;
+};
+
+type Lernender = {
+    id_lernende: number;
+    vorname: string;
+    nachname: string;
+};
+
 export default function KurseLernendePage() {
     const [data, setData] = useState<KursLernender[]>([]);
+    const [kurse, setKurse] = useState<Kurs[]>([]);
+    const [lernende, setLernende] = useState<Lernender[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [editOpen, setEditOpen] = useState(false);
@@ -23,7 +37,35 @@ export default function KurseLernendePage() {
 
     useEffect(() => {
         fetchData();
+        fetchKurse();
+        fetchLernende();
     }, []);
+
+    const fetchKurse = async () => {
+        try {
+            const resp = await fetch(API_BASE_URL + "/kurse.php?all");
+            if (!resp.ok) throw new Error("Fehler beim Laden der Kurse");
+            const json = await resp.json();
+            if (Array.isArray(json)) {
+                setKurse(json);
+            }
+        } catch (e) {
+            console.error("Fehler beim Laden der Kurse:", e);
+        }
+    };
+
+    const fetchLernende = async () => {
+        try {
+            const resp = await fetch(API_BASE_URL + "/lernende.php?all");
+            if (!resp.ok) throw new Error("Fehler beim Laden der Lernenden");
+            const json = await resp.json();
+            if (Array.isArray(json)) {
+                setLernende(json);
+            }
+        } catch (e) {
+            console.error("Fehler beim Laden der Lernenden:", e);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -238,23 +280,53 @@ export default function KurseLernendePage() {
                         </h2>
 
                         <div style={{ display: "grid", gap: "1rem" }}>
-                            {[
-                                ["nr_kurs", "Kurs ID"],
-                                ["nr_lernende", "Lernende ID"],
-                                ["note", "Note"],
-                            ].map(([k, label]) => (
-                                <label key={k}>
-                                    {label}
-                                    <input
-                                        type={k === "note" ? "number" : "text"}
-                                        step={k === "note" ? "0.1" : undefined}
-                                        value={(editForm as any)[k] ?? ""}
-                                        onChange={(e) =>
-                                            setEditForm((f) => ({ ...f, [k]: e.target.value }))
-                                        }
-                                    />
-                                </label>
-                            ))}
+                            <label>
+                                Kurs
+                                <select
+                                    value={editForm.nr_kurs ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, nr_kurs: e.target.value })
+                                    }
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    {kurse.map((kurs) => (
+                                        <option key={kurs.id_kurs} value={kurs.id_kurs}>
+                                            {kurs.kursnummer} - {kurs.kursthema}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Lernender
+                                <select
+                                    value={editForm.nr_lernende ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, nr_lernende: e.target.value })
+                                    }
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    {lernende.map((lernender) => (
+                                        <option key={lernender.id_lernende} value={lernender.id_lernende}>
+                                            {lernender.vorname} {lernender.nachname}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Note
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="1"
+                                    max="6"
+                                    value={editForm.note ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, note: e.target.value })
+                                    }
+                                />
+                            </label>
                         </div>
 
                         <div

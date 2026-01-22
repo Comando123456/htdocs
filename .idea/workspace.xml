@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="add clean layout for homepage and all other pages">
+    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="add darkmode to all pages and TestBerichteFrontend">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dokumentation/TestBerichte.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +60,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
+    "javascript.preferred.runtime.type.id": "node",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/xampp/htdocs",
     "node.js.detected.package.eslint": "true",
@@ -98,7 +100,7 @@
       <workItem from="1768461283409" duration="23827000" />
       <workItem from="1768900501460" duration="392000" />
       <workItem from="1768911151375" duration="15000" />
-      <workItem from="1769066245551" duration="6252000" />
+      <workItem from="1769066245551" duration="17460000" />
     </task>
     <task id="LOCAL-00001" summary="implement CRUD for all pages">
       <option name="closed" value="true" />
@@ -116,7 +118,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768490617050</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="add darkmode to all pages and TestBerichteFrontend">
+      <option name="closed" value="true" />
+      <created>1769075118345</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1769075118345</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -136,6 +146,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="implement CRUD for all pages" />
     <MESSAGE value="add clean layout for homepage and all other pages" />
-    <option name="LAST_COMMIT_MESSAGE" value="add clean layout for homepage and all other pages" />
+    <MESSAGE value="add darkmode to all pages and TestBerichteFrontend" />
+    <option name="LAST_COMMIT_MESSAGE" value="add darkmode to all pages and TestBerichteFrontend" />
   </component>
 </project>

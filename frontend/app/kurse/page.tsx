@@ -14,8 +14,15 @@ type Kurs = {
     dozent_name?: string; // JOIN
 };
 
+type Dozent = {
+    id_dozent: number;
+    vorname: string;
+    nachname: string;
+};
+
 export default function KursePage() {
     const [data, setData] = useState<Kurs[]>([]);
+    const [dozenten, setDozenten] = useState<Dozent[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [editOpen, setEditOpen] = useState(false);
@@ -26,7 +33,21 @@ export default function KursePage() {
 
     useEffect(() => {
         fetchData();
+        fetchDozenten();
     }, []);
+
+    const fetchDozenten = async () => {
+        try {
+            const resp = await fetch(API_BASE_URL + "/dozenten.php?all");
+            if (!resp.ok) throw new Error("Fehler beim Laden der Dozenten");
+            const json = await resp.json();
+            if (Array.isArray(json)) {
+                setDozenten(json);
+            }
+        } catch (e) {
+            console.error("Fehler beim Laden der Dozenten:", e);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -316,22 +337,53 @@ export default function KursePage() {
                                 gap: "1rem",
                             }}
                         >
-                            {[
-                                ["kursnummer", "Kursnummer"],
-                                ["kursthema", "Kursthema"],
-                                ["nr_dozent", "Dozent ID"],
-                                ["dauer", "Dauer (h)"],
-                            ].map(([k, label]) => (
-                                <label key={k}>
-                                    {label}
-                                    <input
-                                        value={(editForm as any)[k] ?? ""}
-                                        onChange={(e) =>
-                                            setEditForm((f) => ({ ...f, [k]: e.target.value }))
-                                        }
-                                    />
-                                </label>
-                            ))}
+                            <label>
+                                Kursnummer
+                                <input
+                                    value={editForm.kursnummer ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, kursnummer: e.target.value })
+                                    }
+                                />
+                            </label>
+
+                            <label>
+                                Kursthema
+                                <input
+                                    value={editForm.kursthema ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, kursthema: e.target.value })
+                                    }
+                                />
+                            </label>
+
+                            <label>
+                                Dozent
+                                <select
+                                    value={editForm.nr_dozent ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, nr_dozent: e.target.value })
+                                    }
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    {dozenten.map((dozent) => (
+                                        <option key={dozent.id_dozent} value={dozent.id_dozent}>
+                                            {dozent.vorname} {dozent.nachname}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Dauer (h)
+                                <input
+                                    type="number"
+                                    value={editForm.dauer ?? ""}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, dauer: e.target.value })
+                                    }
+                                />
+                            </label>
 
                             <label style={{ gridColumn: "1 / -1" }}>
                                 Inhalt

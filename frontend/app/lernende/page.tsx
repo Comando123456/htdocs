@@ -19,8 +19,14 @@ type Lernender = {
     [key: string]: any;
 };
 
+type Land = {
+    id_country: number;
+    country: string;
+};
+
 export default function LernendePage() {
     const [data, setData] = useState<Lernender[] | null>(null);
+    const [laender, setLaender] = useState<Land[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [editOpen, setEditOpen] = useState(false);
@@ -31,7 +37,21 @@ export default function LernendePage() {
 
     useEffect(() => {
         fetchData();
+        fetchLaender();
     }, []);
+
+    const fetchLaender = async () => {
+        try {
+            const resp = await fetch(API_BASE_URL + "/laender.php?all");
+            if (!resp.ok) throw new Error("Fehler beim Laden der Länder");
+            const json = await resp.json();
+            if (Array.isArray(json)) {
+                setLaender(json);
+            }
+        } catch (e) {
+            console.error("Fehler beim Laden der Länder:", e);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -195,8 +215,32 @@ export default function LernendePage() {
                             <label style={{ gridColumn: "1 / -1" }}>Strasse<input value={editForm.strasse ?? ""} onChange={(e) => setEditForm({ ...editForm, strasse: e.target.value })} /></label>
                             <label>PLZ<input value={editForm.plz ?? ""} onChange={(e) => setEditForm({ ...editForm, plz: e.target.value })} /></label>
                             <label>Ort<input value={editForm.ort ?? ""} onChange={(e) => setEditForm({ ...editForm, ort: e.target.value })} /></label>
-                            <label>Land (ID)<input type="number" value={editForm.nr_land ?? ""} onChange={(e) => setEditForm({ ...editForm, nr_land: e.target.value })} /></label>
-                            <label>Geschlecht<input value={editForm.geschlecht ?? ""} onChange={(e) => setEditForm({ ...editForm, geschlecht: e.target.value })} maxLength={1} /></label>
+                            <label>
+                                Land
+                                <select
+                                    value={editForm.nr_land ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, nr_land: e.target.value })}
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    {laender.map((land) => (
+                                        <option key={land.id_country} value={land.id_country}>
+                                            {land.country}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            <label>
+                                Geschlecht
+                                <select
+                                    value={editForm.geschlecht ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, geschlecht: e.target.value })}
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    <option value="m">Männlich</option>
+                                    <option value="w">Weiblich</option>
+                                    <option value="d">Divers</option>
+                                </select>
+                            </label>
                             <label>Telefon<input value={editForm.telefon ?? ""} onChange={(e) => setEditForm({ ...editForm, telefon: e.target.value })} /></label>
                             <label>Handy<input value={editForm.handy ?? ""} onChange={(e) => setEditForm({ ...editForm, handy: e.target.value })} /></label>
                             <label style={{ gridColumn: "1 / -1" }}>E-Mail *<input type="email" value={editForm.email ?? ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} /></label>

@@ -17,8 +17,14 @@ type Dozent = {
     birthdate?: string;
 };
 
+type Land = {
+    id_country: number;
+    country: string;
+};
+
 export default function DozentenPage() {
     const [data, setData] = useState<Dozent[] | null>(null);
+    const [laender, setLaender] = useState<Land[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [editOpen, setEditOpen] = useState(false);
@@ -29,7 +35,21 @@ export default function DozentenPage() {
 
     useEffect(() => {
         fetchData();
+        fetchLaender();
     }, []);
+
+    const fetchLaender = async () => {
+        try {
+            const resp = await fetch(API_BASE_URL + "/laender.php?all");
+            if (!resp.ok) throw new Error("Fehler beim Laden der Länder");
+            const json = await resp.json();
+            if (Array.isArray(json)) {
+                setLaender(json);
+            }
+        } catch (e) {
+            console.error("Fehler beim Laden der Länder:", e);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -46,6 +66,12 @@ export default function DozentenPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const getLandName = (nr_land: number | string | undefined): string => {
+        if (!nr_land) return "-";
+        const land = laender.find(l => l.id_country === Number(nr_land));
+        return land ? land.country : String(nr_land);
     };
 
     const handleNew = () => {
@@ -199,13 +225,14 @@ export default function DozentenPage() {
                             <th>Nachname</th>
                             <th>E-Mail</th>
                             <th>Ort</th>
+                            <th>Land</th>
                             <th style={{ textAlign: "right" }}>Aktionen</th>
                         </tr>
                         </thead>
                         <tbody>
                         {!data || data.length === 0 ? (
                             <tr>
-                                <td colSpan={5} style={{ textAlign: "center", color: "#64748b" }}>
+                                <td colSpan={6} style={{ textAlign: "center", color: "#64748b" }}>
                                     Keine Einträge
                                 </td>
                             </tr>
@@ -216,6 +243,7 @@ export default function DozentenPage() {
                                     <td>{p.nachname ?? "-"}</td>
                                     <td style={{ color: "#64748b" }}>{p.email ?? "-"}</td>
                                     <td>{p.ort ?? "-"}</td>
+                                    <td>{getLandName(p.nr_land)}</td>
                                     <td>
                                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
                                             <button
@@ -269,30 +297,130 @@ export default function DozentenPage() {
                                 gap: "1rem",
                             }}
                         >
-                            {[
-                                ["vorname", "Vorname *"],
-                                ["nachname", "Nachname *"],
-                                ["strasse", "Strasse"],
-                                ["plz", "PLZ"],
-                                ["ort", "Ort"],
-                                ["nr_land", "Land (ID)"],
-                                ["geschlecht", "Geschlecht"],
-                                ["telefon", "Telefon"],
-                                ["handy", "Handy"],
-                                ["email", "E-Mail"],
-                                ["birthdate", "Geburtsdatum"],
-                            ].map(([k, label]) => (
-                                <label key={k}>
-                                    {label}
-                                    <input
-                                        type={k === "birthdate" ? "date" : "text"}
-                                        value={(editForm as any)[k] ?? ""}
-                                        onChange={(e) =>
-                                            setEditForm((f) => ({ ...f, [k]: e.target.value }))
-                                        }
-                                    />
-                                </label>
-                            ))}
+                            <label>
+                                Vorname *
+                                <input
+                                    type="text"
+                                    value={editForm.vorname ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, vorname: e.target.value })}
+                                />
+                            </label>
+
+                            <label>
+                                Nachname *
+                                <input
+                                    type="text"
+                                    value={editForm.nachname ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, nachname: e.target.value })}
+                                />
+                            </label>
+
+                            <label style={{ gridColumn: "1 / -1" }}>
+                                Strasse
+                                <input
+                                    type="text"
+                                    value={editForm.strasse ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, strasse: e.target.value })}
+                                />
+                            </label>
+
+                            <label>
+                                PLZ
+                                <input
+                                    type="text"
+                                    value={editForm.plz ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, plz: e.target.value })}
+                                />
+                            </label>
+
+                            <label>
+                                Ort
+                                <input
+                                    type="text"
+                                    value={editForm.ort ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, ort: e.target.value })}
+                                />
+                            </label>
+
+                            <label>
+                                Land
+                                <select
+                                    value={editForm.nr_land ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, nr_land: e.target.value })}
+                                    style={{
+                                        width: "100%",
+                                        padding: "0.75rem",
+                                        borderRadius: "0.5rem",
+                                        border: "1px solid var(--border)",
+                                        background: "var(--surface)",
+                                        color: "var(--text)"
+                                    }}
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    {laender.map((land) => (
+                                        <option key={land.id_country} value={land.id_country}>
+                                            {land.country}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Geschlecht
+                                <select
+                                    value={editForm.geschlecht ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, geschlecht: e.target.value })}
+                                    style={{
+                                        width: "100%",
+                                        padding: "0.75rem",
+                                        borderRadius: "0.5rem",
+                                        border: "1px solid var(--border)",
+                                        background: "var(--surface)",
+                                        color: "var(--text)"
+                                    }}
+                                >
+                                    <option value="">-- Bitte wählen --</option>
+                                    <option value="m">Männlich</option>
+                                    <option value="w">Weiblich</option>
+                                    <option value="d">Divers</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Telefon
+                                <input
+                                    type="tel"
+                                    value={editForm.telefon ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, telefon: e.target.value })}
+                                />
+                            </label>
+
+                            <label>
+                                Handy
+                                <input
+                                    type="tel"
+                                    value={editForm.handy ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, handy: e.target.value })}
+                                />
+                            </label>
+
+                            <label style={{ gridColumn: "1 / -1" }}>
+                                E-Mail
+                                <input
+                                    type="email"
+                                    value={editForm.email ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                />
+                            </label>
+
+                            <label style={{ gridColumn: "1 / -1" }}>
+                                Geburtsdatum
+                                <input
+                                    type="date"
+                                    value={editForm.birthdate ?? ""}
+                                    onChange={(e) => setEditForm({ ...editForm, birthdate: e.target.value })}
+                                />
+                            </label>
                         </div>
 
                         <div
