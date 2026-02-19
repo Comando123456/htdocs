@@ -334,36 +334,6 @@ export default function HomePage() {
                         <p style={{ fontSize: "1.25rem", opacity: 0.9, marginBottom: "2rem" }}>
                             Zentrale Verwaltung für Kurse, Lernende und Lehrbetriebe
                         </p>
-
-                        {/* Suchfeld */}
-                        <div style={{
-                            background: "rgba(255, 255, 255, 0.2)",
-                            backdropFilter: "blur(10px)",
-                            borderRadius: "12px",
-                            padding: "0.75rem 1.5rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "1rem",
-                            maxWidth: "600px",
-                            border: "1px solid rgba(255, 255, 255, 0.3)"
-                        }}>
-                            <Search size={20} style={{ opacity: 0.7 }} />
-                            <input
-                                type="text"
-                                placeholder="Suche nach Kursen, Lernenden, Dozenten..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{
-                                    background: "transparent",
-                                    border: "none",
-                                    color: "white",
-                                    fontSize: "1rem",
-                                    outline: "none",
-                                    width: "100%",
-                                    padding: 0
-                                }}
-                            />
-                        </div>
                     </div>
                 </div>
 

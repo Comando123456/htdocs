@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="updated required fields">
+    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="remove useless menu buttons">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/page.tsx" afterDir="false" />
     </list>
@@ -102,7 +102,8 @@
       <workItem from="1769503019492" duration="30000" />
       <workItem from="1769503069827" duration="22000" />
       <workItem from="1771484635456" duration="3104000" />
-      <workItem from="1771488439580" duration="4872000" />
+      <workItem from="1771488439580" duration="7606000" />
+      <workItem from="1771503232025" duration="1812000" />
     </task>
     <task id="LOCAL-00001" summary="implement CRUD for all pages">
       <option name="closed" value="true" />
@@ -160,7 +161,23 @@
       <option name="project" value="LOCAL" />
       <updated>1771493563207</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="add success-rate of students and next course">
+      <option name="closed" value="true" />
+      <created>1771497136711</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1771497136711</updated>
+    </task>
+    <task id="LOCAL-00009" summary="remove useless menu buttons">
+      <option name="closed" value="true" />
+      <created>1771504889789</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1771504889789</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -185,6 +202,8 @@
     <MESSAGE value="add test documentation for frontend" />
     <MESSAGE value="add comments to relevant files" />
     <MESSAGE value="updated required fields" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated required fields" />
+    <MESSAGE value="add success-rate of students and next course" />
+    <MESSAGE value="remove useless menu buttons" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove useless menu buttons" />
   </component>
 </project>
