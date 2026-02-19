@@ -292,55 +292,6 @@ export default function HomePage() {
                             Kursverwaltung
                         </span>
                     </div>
-
-                    {/* Aktionsbuttons: Dark Mode, Benachrichtigungen, Einstellungen */}
-                    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                        {/* Schaltet zwischen Dark und Light Mode */}
-                        <button
-                            onClick={() => setDarkMode(!darkMode)}
-                            style={{
-                                background: darkMode ? "rgba(248, 250, 252, 0.1)" : "rgba(15, 23, 42, 0.05)",
-                                border: "none",
-                                padding: "0.5rem",
-                                cursor: "pointer",
-                                color: darkMode ? "#f8fafc" : "#64748b",
-                                boxShadow: "none",
-                                borderRadius: "8px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                transition: "all 0.3s ease"
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = darkMode ? "rgba(248, 250, 252, 0.2)" : "rgba(15, 23, 42, 0.1)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = darkMode ? "rgba(248, 250, 252, 0.1)" : "rgba(15, 23, 42, 0.05)";
-                            }}
-                        >
-                            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-                        </button>
-                        <button style={{
-                            background: "transparent",
-                            border: "none",
-                            padding: "0.5rem",
-                            cursor: "pointer",
-                            color: darkMode ? "#f8fafc" : "#64748b",
-                            boxShadow: "none"
-                        }}>
-                            <Bell size={20} />
-                        </button>
-                        <button style={{
-                            background: "transparent",
-                            border: "none",
-                            padding: "0.5rem",
-                            cursor: "pointer",
-                            color: darkMode ? "#f8fafc" : "#64748b",
-                            boxShadow: "none"
-                        }}>
-                            <Settings size={20} />
-                        </button>
-                    </div>
                 </div>
             </nav>
 
