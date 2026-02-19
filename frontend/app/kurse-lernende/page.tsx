@@ -2,21 +2,24 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
+// Typ für einen Kurse-Lernende-Datensatz (Zuordnungstabelle)
 type KursLernender = {
     id_kurse_lernende?: number;
     nr_kurs?: number | string;
     nr_lernende?: number | string;
     note?: number | string;
     kursthema?: string;
-    lernender_name?: string;
+    lernender_name?: string; // JOIN – wird vom Backend per Verknüpfung geliefert
 };
 
+// Typ für einen Kurs-Eintrag (wird für das Auswahlmenü benötigt)
 type Kurs = {
     id_kurs: number;
     kursnummer: string;
     kursthema: string;
 };
 
+// Typ für einen Lernenden-Eintrag (wird für das Auswahlmenü benötigt)
 type Lernender = {
     id_lernende: number;
     vorname: string;
@@ -24,23 +27,33 @@ type Lernender = {
 };
 
 export default function KurseLernendePage() {
+    // Zustandsvariablen für Daten, Ladezustand und Fehlermeldung
     const [data, setData] = useState<KursLernender[]>([]);
     const [kurse, setKurse] = useState<Kurs[]>([]);
     const [lernende, setLernende] = useState<Lernender[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Steuert ob das Bearbeitungs-Modal geöffnet ist
     const [editOpen, setEditOpen] = useState(false);
+
+    // Aktuell bearbeiteter Eintrag (null = neuer Eintrag)
     const [editItem, setEditItem] = useState<KursLernender | null>(null);
+
+    // Formularwerte im Modal
     const [editForm, setEditForm] = useState<Partial<KursLernender>>({});
 
+    // Basis-URL der API
     const API_BASE_URL = "http://localhost";
 
+    // Beim ersten Laden: Zuordnungen, Kurse und Lernende abrufen
     useEffect(() => {
         fetchData();
         fetchKurse();
         fetchLernende();
     }, []);
 
+    // Lädt alle verfügbaren Kurse für das Auswahlmenü
     const fetchKurse = async () => {
         try {
             const resp = await fetch(API_BASE_URL + "/kurse.php?all");
@@ -54,6 +67,7 @@ export default function KurseLernendePage() {
         }
     };
 
+    // Lädt alle verfügbaren Lernenden für das Auswahlmenü
     const fetchLernende = async () => {
         try {
             const resp = await fetch(API_BASE_URL + "/lernende.php?all");
@@ -67,6 +81,7 @@ export default function KurseLernendePage() {
         }
     };
 
+    // Lädt alle Kurse-Lernende-Zuordnungen inkl. Namen via JOIN-Endpunkt
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -84,12 +99,14 @@ export default function KurseLernendePage() {
         }
     };
 
+    // Öffnet das Modal für einen neuen Eintrag mit leeren Feldern
     const handleNew = () => {
         setEditItem(null);
         setEditForm({ nr_kurs: "", nr_lernende: "", note: "" });
         setEditOpen(true);
     };
 
+    // Öffnet das Modal für einen bestehenden Eintrag und befüllt das Formular
     const handleEdit = (p: KursLernender) => {
         setEditItem(p);
         setEditForm({
@@ -100,6 +117,7 @@ export default function KurseLernendePage() {
         setEditOpen(true);
     };
 
+    // Speichert den Eintrag: PUT bei Bearbeitung, POST bei Neuerstellung
     const handleSave = async () => {
         const isEdit = !!editItem;
         setEditOpen(false);
@@ -110,14 +128,15 @@ export default function KurseLernendePage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(
                     isEdit
-                        ? { id_kurse_lernende: editItem!.id_kurse_lernende, ...editForm }
-                        : editForm
+                        ? { id_kurse_lernende: editItem!.id_kurse_lernende, ...editForm } // Bestehenden Eintrag mit ID übergeben
+                        : editForm                                                          // Neuen Eintrag ohne ID übergeben
                 ),
             });
 
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Speichern neu laden
             await fetchData();
         } catch {
             alert("Speichern fehlgeschlagen");
@@ -126,6 +145,7 @@ export default function KurseLernendePage() {
         }
     };
 
+    // Löscht eine Zuordnung nach Bestätigung durch den Benutzer
     const handleDelete = async (p: KursLernender) => {
         if (!p.id_kurse_lernende) return;
         if (!confirm(`Eintrag löschen?\nKurs: ${p.kursthema}\nLernender: ${p.lernender_name}`))
@@ -142,6 +162,7 @@ export default function KurseLernendePage() {
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
             alert("Löschen fehlgeschlagen");
@@ -150,7 +171,7 @@ export default function KurseLernendePage() {
 
     return (
         <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
-            {/* Header */}
+            {/* Seitenkopf mit Titel und Button für neuen Eintrag */}
             <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "2rem 0" }}>
                 <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
@@ -188,8 +209,9 @@ export default function KurseLernendePage() {
                 </div>
             </header>
 
-            {/* Content */}
+            {/* Hauptinhalt: Tabelle mit allen Kurse-Lernende-Zuordnungen */}
             <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {/* Ladeanzeige während Daten abgerufen werden */}
                 {loading && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b" }}>
                         <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
@@ -197,6 +219,7 @@ export default function KurseLernendePage() {
                     </div>
                 )}
 
+                {/* Fehlermeldung bei gescheitertem API-Aufruf */}
                 {error && (
                     <div style={{ padding: "1rem", background: "#fee", color: "#c00", borderRadius: "0.5rem" }}>
                         {error}
@@ -221,6 +244,7 @@ export default function KurseLernendePage() {
                         </tr>
                         </thead>
                         <tbody>
+                        {/* Fallback-Zeile wenn keine Einträge vorhanden */}
                         {data.length === 0 ? (
                             <tr>
                                 <td colSpan={4} style={{ textAlign: "center", color: "#64748b" }}>
@@ -228,12 +252,14 @@ export default function KurseLernendePage() {
                                 </td>
                             </tr>
                         ) : (
+                            // Alle Zuordnungen als Tabellenzeilen rendern
                             data.map((p) => (
                                 <tr key={p.id_kurse_lernende}>
                                     <td style={{ fontWeight: 500 }}>{p.kursthema ?? "-"}</td>
                                     <td>{p.lernender_name ?? "-"}</td>
                                     <td>{p.note ?? "-"}</td>
                                     <td>
+                                        {/* Aktionsbuttons: Bearbeiten und Löschen */}
                                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
                                             <button
                                                 onClick={() => handleEdit(p)}
@@ -267,19 +293,21 @@ export default function KurseLernendePage() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal für Erstellen / Bearbeiten einer Kurse-Lernende-Zuordnung */}
             {editOpen && (
                 <div className="modal-overlay" onClick={() => setEditOpen(false)}>
                     <div
                         className="modal-content"
                         style={{ maxWidth: "600px", width: "90%" }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} // Klick im Modal schliesst es nicht
                     >
                         <h2 style={{ marginBottom: "1.5rem" }}>
                             {editItem ? "Eintrag bearbeiten" : "Neuer Kurse–Lernende Eintrag"}
                         </h2>
 
+                        {/* Formularfelder: Kurs, Lernender und Note */}
                         <div style={{ display: "grid", gap: "1rem" }}>
+                            {/* Kurs wird dynamisch aus der Kurse-API befüllt */}
                             <label>
                                 Kurs
                                 <select
@@ -297,6 +325,7 @@ export default function KurseLernendePage() {
                                 </select>
                             </label>
 
+                            {/* Lernender wird dynamisch aus der Lernende-API befüllt */}
                             <label>
                                 Lernender
                                 <select
@@ -314,6 +343,7 @@ export default function KurseLernendePage() {
                                 </select>
                             </label>
 
+                            {/* Note: Schweizer Skala 1–6 mit Schritten von 0.1 */}
                             <label>
                                 Note
                                 <input
@@ -329,6 +359,7 @@ export default function KurseLernendePage() {
                             </label>
                         </div>
 
+                        {/* Modal-Aktionen: Abbrechen oder Speichern */}
                         <div
                             style={{
                                 display: "flex",

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
+// Typ für einen Kurs-Datensatz
 type Kurs = {
     id_kurs?: number;
     kursnummer?: string;
@@ -11,9 +12,10 @@ type Kurs = {
     startdatum?: string;
     enddatum?: string;
     dauer?: number | string;
-    dozent_name?: string; // JOIN
+    dozent_name?: string; // JOIN – wird vom Backend per Verknüpfung mit tbl_dozenten geliefert
 };
 
+// Typ für einen Dozenten-Eintrag (wird für das Auswahlmenü benötigt)
 type Dozent = {
     id_dozent: number;
     vorname: string;
@@ -21,21 +23,31 @@ type Dozent = {
 };
 
 export default function KursePage() {
+    // Zustandsvariablen für Daten, Ladezustand und Fehlermeldung
     const [data, setData] = useState<Kurs[]>([]);
     const [dozenten, setDozenten] = useState<Dozent[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Steuert ob das Bearbeitungs-Modal geöffnet ist
     const [editOpen, setEditOpen] = useState(false);
+
+    // Aktuell bearbeiteter Kurs (null = neuer Eintrag)
     const [editItem, setEditItem] = useState<Kurs | null>(null);
+
+    // Formularwerte im Modal
     const [editForm, setEditForm] = useState<Partial<Kurs>>({});
 
+    // Basis-URL der API
     const API_BASE_URL = "http://localhost";
 
+    // Beim ersten Laden: Kurse und Dozenten abrufen
     useEffect(() => {
         fetchData();
         fetchDozenten();
     }, []);
 
+    // Lädt alle verfügbaren Dozenten für das Auswahlmenü
     const fetchDozenten = async () => {
         try {
             const resp = await fetch(API_BASE_URL + "/dozenten.php?all");
@@ -49,6 +61,7 @@ export default function KursePage() {
         }
     };
 
+    // Lädt alle Kurse inkl. Dozenten-Name via JOIN-Endpunkt
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -66,6 +79,7 @@ export default function KursePage() {
         }
     };
 
+    // Öffnet das Modal für einen neuen Kurs mit leeren Feldern
     const handleNew = () => {
         setEditItem(null);
         setEditForm({
@@ -80,6 +94,7 @@ export default function KursePage() {
         setEditOpen(true);
     };
 
+    // Öffnet das Modal für einen bestehenden Kurs und befüllt das Formular
     const handleEdit = (p: Kurs) => {
         setEditItem(p);
         setEditForm({
@@ -94,6 +109,7 @@ export default function KursePage() {
         setEditOpen(true);
     };
 
+    // Speichert den Kurs: PUT bei Bearbeitung, POST bei Neuerstellung
     const handleSave = async () => {
         const isEdit = !!editItem;
         setEditOpen(false);
@@ -104,14 +120,15 @@ export default function KursePage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(
                     isEdit
-                        ? { id_kurs: editItem!.id_kurs, ...editForm }
-                        : editForm
+                        ? { id_kurs: editItem!.id_kurs, ...editForm } // Bestehenden Eintrag mit ID übergeben
+                        : editForm                                      // Neuen Eintrag ohne ID übergeben
                 ),
             });
 
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Speichern neu laden
             await fetchData();
         } catch {
             alert("Speichern fehlgeschlagen");
@@ -120,6 +137,7 @@ export default function KursePage() {
         }
     };
 
+    // Löscht einen Kurs nach Bestätigung durch den Benutzer
     const handleDelete = async (p: Kurs) => {
         if (!p.id_kurs) return;
         if (
@@ -138,6 +156,7 @@ export default function KursePage() {
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
             alert("Löschen fehlgeschlagen");
@@ -146,7 +165,7 @@ export default function KursePage() {
 
     return (
         <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
-            {/* Header */}
+            {/* Seitenkopf mit Titel und Button für neuen Kurs */}
             <header
                 style={{
                     background: "white",
@@ -213,8 +232,9 @@ export default function KursePage() {
                 </div>
             </header>
 
-            {/* Content */}
+            {/* Hauptinhalt: Tabelle mit allen Kursen */}
             <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {/* Ladeanzeige während Daten abgerufen werden */}
                 {loading && (
                     <div
                         style={{
@@ -229,6 +249,7 @@ export default function KursePage() {
                     </div>
                 )}
 
+                {/* Fehlermeldung bei gescheitertem API-Aufruf */}
                 {error && (
                     <div
                         style={{
@@ -263,6 +284,7 @@ export default function KursePage() {
                         </tr>
                         </thead>
                         <tbody>
+                        {/* Fallback-Zeile wenn keine Einträge vorhanden */}
                         {data.length === 0 ? (
                             <tr>
                                 <td colSpan={7} style={{ textAlign: "center", color: "#64748b" }}>
@@ -270,6 +292,7 @@ export default function KursePage() {
                                 </td>
                             </tr>
                         ) : (
+                            // Alle Kurse als Tabellenzeilen rendern
                             data.map((p) => (
                                 <tr key={p.id_kurs}>
                                     <td style={{ fontWeight: 500 }}>{p.kursnummer ?? "-"}</td>
@@ -279,6 +302,7 @@ export default function KursePage() {
                                     <td>{p.enddatum ?? "-"}</td>
                                     <td>{p.dauer ?? "-"}</td>
                                     <td>
+                                        {/* Aktionsbuttons: Bearbeiten und Löschen */}
                                         <div
                                             style={{
                                                 display: "flex",
@@ -318,18 +342,19 @@ export default function KursePage() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal für Erstellen / Bearbeiten eines Kurses */}
             {editOpen && (
                 <div className="modal-overlay" onClick={() => setEditOpen(false)}>
                     <div
                         className="modal-content"
                         style={{ maxWidth: "800px", width: "90%" }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} // Klick im Modal schliesst es nicht
                     >
                         <h2 style={{ marginBottom: "1.5rem" }}>
                             {editItem ? "Kurs bearbeiten" : "Neuer Kurs"}
                         </h2>
 
+                        {/* Formularfelder im 2-Spalten-Grid */}
                         <div
                             style={{
                                 display: "grid",
@@ -357,6 +382,7 @@ export default function KursePage() {
                                 />
                             </label>
 
+                            {/* Dozent wird dynamisch aus der Dozenten-API befüllt */}
                             <label>
                                 Dozent
                                 <select
@@ -385,6 +411,7 @@ export default function KursePage() {
                                 />
                             </label>
 
+                            {/* Inhalt nimmt die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>
                                 Inhalt
                                 <input
@@ -417,6 +444,7 @@ export default function KursePage() {
                             </label>
                         </div>
 
+                        {/* Modal-Aktionen: Abbrechen oder Speichern */}
                         <div
                             style={{
                                 display: "flex",

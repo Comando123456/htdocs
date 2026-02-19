@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
+// Typ für einen Lehrbetrieb-Datensatz
 type Lehrbetrieb = {
     id_lehrbetrieb?: number;
     firma?: string;
@@ -11,19 +12,29 @@ type Lehrbetrieb = {
 };
 
 export default function LehrbetriebePage() {
+    // Zustandsvariablen für Daten, Ladezustand und Fehlermeldung
     const [data, setData] = useState<Lehrbetrieb[] | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Steuert ob das Bearbeitungs-Modal geöffnet ist
     const [editOpen, setEditOpen] = useState<boolean>(false);
+
+    // Aktuell bearbeiteter Lehrbetrieb (null = neuer Eintrag)
     const [editItem, setEditItem] = useState<Lehrbetrieb | null>(null);
+
+    // Formularwerte im Modal
     const [editForm, setEditForm] = useState<Partial<Lehrbetrieb>>({});
 
+    // Basis-URL der API
     const API_BASE_URL = "http://localhost";
 
+    // Beim ersten Laden: Lehrbetriebe abrufen
     useEffect(() => {
         fetchData();
     }, []);
 
+    // Lädt alle Lehrbetriebe von der API
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -41,12 +52,14 @@ export default function LehrbetriebePage() {
         }
     };
 
+    // Öffnet das Modal für einen neuen Lehrbetrieb mit leeren Feldern
     const handleNew = () => {
         setEditItem(null);
         setEditForm({ firma: "", strasse: "", plz: "", ort: "" });
         setEditOpen(true);
     };
 
+    // Öffnet das Modal für einen bestehenden Lehrbetrieb und befüllt das Formular
     const handleEdit = (p: Lehrbetrieb) => {
         setEditItem(p);
         setEditForm({
@@ -58,6 +71,7 @@ export default function LehrbetriebePage() {
         setEditOpen(true);
     };
 
+    // Speichert den Lehrbetrieb: PUT bei Bearbeitung, POST bei Neuerstellung
     const handleSave = async () => {
         const isEdit = !!editItem;
         setEditOpen(false);
@@ -68,14 +82,15 @@ export default function LehrbetriebePage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(
                     isEdit
-                        ? { id_lehrbetrieb: editItem!.id_lehrbetrieb, ...editForm }
-                        : editForm
+                        ? { id_lehrbetrieb: editItem!.id_lehrbetrieb, ...editForm } // Bestehenden Eintrag mit ID übergeben
+                        : editForm                                                    // Neuen Eintrag ohne ID übergeben
                 ),
             });
 
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Speichern neu laden
             await fetchData();
         } catch {
             alert("Speichern fehlgeschlagen");
@@ -84,6 +99,7 @@ export default function LehrbetriebePage() {
         }
     };
 
+    // Löscht einen Lehrbetrieb nach Bestätigung durch den Benutzer
     const handleDelete = async (p: Lehrbetrieb) => {
         if (!p.id_lehrbetrieb) return;
         if (!confirm(`Lehrbetrieb "${p.firma}" löschen?`)) return;
@@ -99,6 +115,7 @@ export default function LehrbetriebePage() {
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
             alert("Löschen fehlgeschlagen");
@@ -107,7 +124,7 @@ export default function LehrbetriebePage() {
 
     return (
         <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
-            {/* Header */}
+            {/* Seitenkopf mit Titel und Button für neuen Lehrbetrieb */}
             <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "2rem 0" }}>
                 <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
@@ -143,8 +160,9 @@ export default function LehrbetriebePage() {
                 </div>
             </header>
 
-            {/* Content */}
+            {/* Hauptinhalt: Tabelle mit allen Lehrbetrieben */}
             <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {/* Ladeanzeige während Daten abgerufen werden */}
                 {loading && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b" }}>
                         <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
@@ -152,6 +170,7 @@ export default function LehrbetriebePage() {
                     </div>
                 )}
 
+                {/* Fehlermeldung bei gescheitertem API-Aufruf */}
                 {error && (
                     <div style={{ padding: "1rem", background: "#fee", color: "#c00", borderRadius: "0.5rem" }}>
                         {error}
@@ -177,6 +196,7 @@ export default function LehrbetriebePage() {
                         </tr>
                         </thead>
                         <tbody>
+                        {/* Fallback-Zeile wenn keine Einträge vorhanden */}
                         {!data || data.length === 0 ? (
                             <tr>
                                 <td colSpan={5} style={{ textAlign: "center", color: "#64748b" }}>
@@ -184,6 +204,7 @@ export default function LehrbetriebePage() {
                                 </td>
                             </tr>
                         ) : (
+                            // Alle Lehrbetriebe als Tabellenzeilen rendern
                             data.map((p) => (
                                 <tr key={p.id_lehrbetrieb}>
                                     <td style={{ fontWeight: 500 }}>{p.firma ?? "-"}</td>
@@ -191,6 +212,7 @@ export default function LehrbetriebePage() {
                                     <td>{p.plz ?? "-"}</td>
                                     <td>{p.ort ?? "-"}</td>
                                     <td>
+                                        {/* Aktionsbuttons: Bearbeiten und Löschen */}
                                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
                                             <button
                                                 onClick={() => handleEdit(p)}
@@ -224,19 +246,21 @@ export default function LehrbetriebePage() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal für Erstellen / Bearbeiten eines Lehrbetriebs */}
             {editOpen && (
                 <div className="modal-overlay" onClick={() => setEditOpen(false)}>
                     <div
                         className="modal-content"
                         style={{ maxWidth: "600px", width: "90%" }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} // Klick im Modal schliesst es nicht
                     >
                         <h2 style={{ marginBottom: "1.5rem" }}>
                             {editItem ? "Lehrbetrieb bearbeiten" : "Neuer Lehrbetrieb"}
                         </h2>
 
+                        {/* Formularfelder im 2-Spalten-Grid */}
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }}>
+                            {/* Firmenname nimmt die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>
                                 Firma *
                                 <input
@@ -258,6 +282,7 @@ export default function LehrbetriebePage() {
                                     onChange={(e) => setEditForm({ ...editForm, plz: e.target.value })}
                                 />
                             </label>
+                            {/* Ort nimmt die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>
                                 Ort
                                 <input
@@ -267,6 +292,7 @@ export default function LehrbetriebePage() {
                             </label>
                         </div>
 
+                        {/* Modal-Aktionen: Abbrechen oder Speichern */}
                         <div
                             style={{
                                 display: "flex",

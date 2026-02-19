@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
+// Typ für einen Lernenden-Datensatz
+// [key: string]: any erlaubt zusätzliche dynamische Felder vom Backend
 type Lernender = {
     id_lernende?: number;
     vorname?: string;
@@ -19,27 +21,38 @@ type Lernender = {
     [key: string]: any;
 };
 
+// Typ für einen Länder-Eintrag (wird für das Auswahlmenü benötigt)
 type Land = {
     id_country: number;
     country: string;
 };
 
 export default function LernendePage() {
+    // Zustandsvariablen für Daten, Ladezustand und Fehlermeldung
     const [data, setData] = useState<Lernender[] | null>(null);
     const [laender, setLaender] = useState<Land[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Steuert ob das Bearbeitungs-Modal geöffnet ist
     const [editOpen, setEditOpen] = useState(false);
+
+    // Aktuell bearbeiteter Lernender (null = neuer Eintrag)
     const [editItem, setEditItem] = useState<Lernender | null>(null);
+
+    // Formularwerte im Modal
     const [editForm, setEditForm] = useState<Partial<Lernender>>({});
 
+    // Basis-URL der API
     const API_BASE_URL = "http://localhost";
 
+    // Beim ersten Laden: Lernende und Länder abrufen
     useEffect(() => {
         fetchData();
         fetchLaender();
     }, []);
 
+    // Lädt alle verfügbaren Länder für das Auswahlmenü
     const fetchLaender = async () => {
         try {
             const resp = await fetch(API_BASE_URL + "/laender.php?all");
@@ -53,6 +66,7 @@ export default function LernendePage() {
         }
     };
 
+    // Lädt alle Lernenden von der API
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -70,6 +84,7 @@ export default function LernendePage() {
         }
     };
 
+    // Öffnet das Modal für einen neuen Lernenden mit leeren Feldern
     const handleNew = () => {
         setEditItem(null);
         setEditForm({
@@ -80,6 +95,7 @@ export default function LernendePage() {
         setEditOpen(true);
     };
 
+    // Öffnet das Modal für einen bestehenden Lernenden und befüllt das Formular
     const handleEdit = (p: Lernender) => {
         setEditItem(p);
         setEditForm({
@@ -93,6 +109,7 @@ export default function LernendePage() {
         setEditOpen(true);
     };
 
+    // Speichert den Lernenden: PUT bei Bearbeitung, POST bei Neuerstellung
     const handleSave = async () => {
         const isEdit = !!editItem;
         setEditOpen(false);
@@ -102,16 +119,19 @@ export default function LernendePage() {
                 method: isEdit ? "PUT" : "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(
-                    isEdit ? { id_lernende: editItem!.id_lernende, ...editForm } : editForm
+                    isEdit ? { id_lernende: editItem!.id_lernende, ...editForm } : editForm // Bestehenden Eintrag mit ID übergeben, neuen ohne ID
                 ),
             });
             if (!resp.ok) throw new Error("Fehler beim Speichern");
+
+            // Liste nach erfolgreichem Speichern neu laden
             await fetchData();
         } catch {
             alert("Speichern fehlgeschlagen");
         }
     };
 
+    // Löscht einen Lernenden nach Bestätigung durch den Benutzer
     const handleDelete = async (p: Lernender) => {
         if (!p.id_lernende) return;
         if (!confirm(`${p.vorname} ${p.nachname} wirklich löschen?`)) return;
@@ -122,6 +142,8 @@ export default function LernendePage() {
                 { method: "DELETE" }
             );
             if (!resp.ok) throw new Error("Fehler beim Löschen");
+
+            // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
             alert("Löschen fehlgeschlagen");
@@ -130,7 +152,7 @@ export default function LernendePage() {
 
     return (
         <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
-            {/* Header */}
+            {/* Seitenkopf mit Titel und Button für neuen Lernenden */}
             <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "2rem 0" }}>
                 <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
@@ -155,14 +177,17 @@ export default function LernendePage() {
                 </div>
             </header>
 
-            {/* Content */}
+            {/* Hauptinhalt: Tabelle mit allen Lernenden */}
             <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {/* Ladeanzeige während Daten abgerufen werden */}
                 {loading && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b" }}>
                         <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
                         Lade Daten...
                     </div>
                 )}
+
+                {/* Fehlermeldung bei gescheitertem API-Aufruf */}
                 {error && <div style={{ padding: "1rem", background: "#fee", color: "#c00", borderRadius: "0.5rem" }}>{error}</div>}
 
                 <div style={{ background: "white", borderRadius: "0.75rem", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", overflow: "hidden" }}>
@@ -177,9 +202,11 @@ export default function LernendePage() {
                         </tr>
                         </thead>
                         <tbody>
+                        {/* Fallback-Zeile wenn keine Einträge vorhanden */}
                         {!data || data.length === 0 ? (
                             <tr><td colSpan={5} style={{ textAlign: "center", color: "#64748b" }}>Keine Einträge</td></tr>
                         ) : (
+                            // Alle Lernenden als Tabellenzeilen rendern
                             data.map((p) => (
                                 <tr key={p.id_lernende}>
                                     <td style={{ fontWeight: "500" }}>{p.vorname ?? "-"}</td>
@@ -187,6 +214,7 @@ export default function LernendePage() {
                                     <td style={{ color: "#64748b" }}>{p.email ?? "-"}</td>
                                     <td>{p.ort ?? "-"}</td>
                                     <td>
+                                        {/* Aktionsbuttons: Bearbeiten und Löschen */}
                                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
                                             <button onClick={() => handleEdit(p)} style={{ padding: "0.5rem", background: "#f8fafc", color: "#3b82f6", border: "1px solid #e2e8f0" }}>
                                                 <Edit2 size={16} />
@@ -204,17 +232,24 @@ export default function LernendePage() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal für Erstellen / Bearbeiten eines Lernenden */}
             {editOpen && (
                 <div className="modal-overlay" onClick={() => setEditOpen(false)}>
-                    <div className="modal-content" style={{ maxWidth: "800px", width: "90%" }} onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content" style={{ maxWidth: "800px", width: "90%" }} onClick={(e) => e.stopPropagation()} /* Klick im Modal schliesst es nicht */>
                         <h2 style={{ marginBottom: "1.5rem" }}>{editItem ? "Lernender bearbeiten" : "Neuer Lernender"}</h2>
+
+                        {/* Formularfelder im 2-Spalten-Grid */}
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }}>
                             <label>Vorname *<input value={editForm.vorname ?? ""} onChange={(e) => setEditForm({ ...editForm, vorname: e.target.value })} /></label>
                             <label>Nachname *<input value={editForm.nachname ?? ""} onChange={(e) => setEditForm({ ...editForm, nachname: e.target.value })} /></label>
+
+                            {/* Strasse nimmt die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>Strasse<input value={editForm.strasse ?? ""} onChange={(e) => setEditForm({ ...editForm, strasse: e.target.value })} /></label>
+
                             <label>PLZ<input value={editForm.plz ?? ""} onChange={(e) => setEditForm({ ...editForm, plz: e.target.value })} /></label>
                             <label>Ort<input value={editForm.ort ?? ""} onChange={(e) => setEditForm({ ...editForm, ort: e.target.value })} /></label>
+
+                            {/* Land wird dynamisch aus der Länder-API befüllt */}
                             <label>
                                 Land
                                 <select
@@ -229,6 +264,7 @@ export default function LernendePage() {
                                     ))}
                                 </select>
                             </label>
+
                             <label>
                                 Geschlecht
                                 <select
@@ -241,12 +277,19 @@ export default function LernendePage() {
                                     <option value="d">Divers</option>
                                 </select>
                             </label>
+
                             <label>Telefon<input value={editForm.telefon ?? ""} onChange={(e) => setEditForm({ ...editForm, telefon: e.target.value })} /></label>
                             <label>Handy<input value={editForm.handy ?? ""} onChange={(e) => setEditForm({ ...editForm, handy: e.target.value })} /></label>
+
+                            {/* E-Mail Felder nehmen die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>E-Mail *<input type="email" value={editForm.email ?? ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} /></label>
                             <label style={{ gridColumn: "1 / -1" }}>E-Mail privat<input type="email" value={editForm.email_privat ?? ""} onChange={(e) => setEditForm({ ...editForm, email_privat: e.target.value })} /></label>
+
+                            {/* Geburtsdatum nimmt die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>Geburtsdatum<input type="date" value={editForm.birthdate ?? ""} onChange={(e) => setEditForm({ ...editForm, birthdate: e.target.value })} /></label>
                         </div>
+
+                        {/* Modal-Aktionen: Abbrechen oder Speichern */}
                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", marginTop: "1.5rem" }}>
                             <button onClick={() => setEditOpen(false)} style={{ background: "white", color: "#64748b", border: "1px solid #e2e8f0" }}>Abbrechen</button>
                             <button onClick={handleSave}>Speichern</button>

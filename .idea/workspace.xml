@@ -4,9 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="add dropdowns for foreign key fields">
+    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="add test documentation for frontend">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dokumentation/TestBerichteFrontend.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/laender/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/laender/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lehrbetriebe-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lehrbetriebe-lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lehrbetriebe/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lehrbetriebe/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,7 +108,8 @@
       <workItem from="1769066245551" duration="18267000" />
       <workItem from="1769503019492" duration="30000" />
       <workItem from="1769503069827" duration="22000" />
-      <workItem from="1771484635456" duration="2896000" />
+      <workItem from="1771484635456" duration="3104000" />
+      <workItem from="1771488439580" duration="1443000" />
     </task>
     <task id="LOCAL-00001" summary="implement CRUD for all pages">
       <option name="closed" value="true" />
@@ -135,7 +143,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769094386435</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="add test documentation for frontend">
+      <option name="closed" value="true" />
+      <created>1771487650013</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1771487650013</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -157,6 +173,7 @@
     <MESSAGE value="add clean layout for homepage and all other pages" />
     <MESSAGE value="add darkmode to all pages and TestBerichteFrontend" />
     <MESSAGE value="add dropdowns for foreign key fields" />
-    <option name="LAST_COMMIT_MESSAGE" value="add dropdowns for foreign key fields" />
+    <MESSAGE value="add test documentation for frontend" />
+    <option name="LAST_COMMIT_MESSAGE" value="add test documentation for frontend" />
   </component>
 </project>

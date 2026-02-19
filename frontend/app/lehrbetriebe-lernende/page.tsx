@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
+// Typ für einen Lehrbetriebe-Lernende-Datensatz (Zuordnungstabelle)
 type LehrbetriebLernender = {
     id_lehrbetriebe_lernende?: number;
     nr_lehrbetrieb?: number | string;
@@ -9,15 +10,17 @@ type LehrbetriebLernender = {
     start?: string;
     ende?: string;
     beruf?: string;
-    firma?: string;
-    lernender_name?: string;
+    firma?: string;         // JOIN – Firmenname aus tbl_lehrbetriebe
+    lernender_name?: string; // JOIN – vollständiger Name aus tbl_lernende
 };
 
+// Typ für einen Lehrbetrieb-Eintrag (wird für das Auswahlmenü benötigt)
 type Lehrbetrieb = {
     id_lehrbetrieb: number;
     firma: string;
 };
 
+// Typ für einen Lernenden-Eintrag (wird für das Auswahlmenü benötigt)
 type Lernender = {
     id_lernende: number;
     vorname: string;
@@ -25,23 +28,33 @@ type Lernender = {
 };
 
 export default function LehrbetriebeLernendePage() {
+    // Zustandsvariablen für Daten, Ladezustand und Fehlermeldung
     const [data, setData] = useState<LehrbetriebLernender[]>([]);
     const [lehrbetriebe, setLehrbetriebe] = useState<Lehrbetrieb[]>([]);
     const [lernende, setLernende] = useState<Lernender[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Steuert ob das Bearbeitungs-Modal geöffnet ist
     const [editOpen, setEditOpen] = useState(false);
+
+    // Aktuell bearbeiteter Eintrag (null = neuer Eintrag)
     const [editItem, setEditItem] = useState<LehrbetriebLernender | null>(null);
+
+    // Formularwerte im Modal
     const [editForm, setEditForm] = useState<Partial<LehrbetriebLernender>>({});
 
+    // Basis-URL der API
     const API_BASE_URL = "http://localhost";
 
+    // Beim ersten Laden: Zuordnungen, Lehrbetriebe und Lernende abrufen
     useEffect(() => {
         fetchData();
         fetchLehrbetriebe();
         fetchLernende();
     }, []);
 
+    // Lädt alle verfügbaren Lehrbetriebe für das Auswahlmenü
     const fetchLehrbetriebe = async () => {
         try {
             const resp = await fetch(API_BASE_URL + "/lehrbetriebe.php?all");
@@ -55,6 +68,7 @@ export default function LehrbetriebeLernendePage() {
         }
     };
 
+    // Lädt alle verfügbaren Lernenden für das Auswahlmenü
     const fetchLernende = async () => {
         try {
             const resp = await fetch(API_BASE_URL + "/lernende.php?all");
@@ -68,6 +82,7 @@ export default function LehrbetriebeLernendePage() {
         }
     };
 
+    // Lädt alle Lehrbetriebe-Lernende-Zuordnungen inkl. Namen via JOIN-Endpunkt
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -87,6 +102,7 @@ export default function LehrbetriebeLernendePage() {
         }
     };
 
+    // Öffnet das Modal für einen neuen Eintrag mit leeren Feldern
     const handleNew = () => {
         setEditItem(null);
         setEditForm({
@@ -99,6 +115,7 @@ export default function LehrbetriebeLernendePage() {
         setEditOpen(true);
     };
 
+    // Öffnet das Modal für einen bestehenden Eintrag und befüllt das Formular
     const handleEdit = (p: LehrbetriebLernender) => {
         setEditItem(p);
         setEditForm({
@@ -111,6 +128,7 @@ export default function LehrbetriebeLernendePage() {
         setEditOpen(true);
     };
 
+    // Speichert den Eintrag: PUT bei Bearbeitung, POST bei Neuerstellung
     const handleSave = async () => {
         const isEdit = !!editItem;
         setEditOpen(false);
@@ -123,16 +141,17 @@ export default function LehrbetriebeLernendePage() {
                     isEdit
                         ? {
                             id_lehrbetriebe_lernende:
-                            editItem!.id_lehrbetriebe_lernende,
+                            editItem!.id_lehrbetriebe_lernende, // Bestehenden Eintrag mit ID übergeben
                             ...editForm,
                         }
-                        : editForm
+                        : editForm // Neuen Eintrag ohne ID übergeben
                 ),
             });
 
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Speichern neu laden
             await fetchData();
         } catch {
             alert("Speichern fehlgeschlagen");
@@ -141,6 +160,7 @@ export default function LehrbetriebeLernendePage() {
         }
     };
 
+    // Löscht eine Zuordnung nach Bestätigung durch den Benutzer
     const handleDelete = async (p: LehrbetriebLernender) => {
         if (!p.id_lehrbetriebe_lernende) return;
         if (
@@ -161,6 +181,7 @@ export default function LehrbetriebeLernendePage() {
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
             alert("Löschen fehlgeschlagen");
@@ -169,7 +190,7 @@ export default function LehrbetriebeLernendePage() {
 
     return (
         <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
-            {/* Header */}
+            {/* Seitenkopf mit Titel und Button für neuen Eintrag */}
             <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "2rem 0" }}>
                 <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
@@ -207,8 +228,9 @@ export default function LehrbetriebeLernendePage() {
                 </div>
             </header>
 
-            {/* Content */}
+            {/* Hauptinhalt: Tabelle mit allen Lehrbetriebe-Lernende-Zuordnungen */}
             <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {/* Ladeanzeige während Daten abgerufen werden */}
                 {loading && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b" }}>
                         <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
@@ -216,6 +238,7 @@ export default function LehrbetriebeLernendePage() {
                     </div>
                 )}
 
+                {/* Fehlermeldung bei gescheitertem API-Aufruf */}
                 {error && (
                     <div style={{ padding: "1rem", background: "#fee", color: "#c00", borderRadius: "0.5rem" }}>
                         {error}
@@ -242,6 +265,7 @@ export default function LehrbetriebeLernendePage() {
                         </tr>
                         </thead>
                         <tbody>
+                        {/* Fallback-Zeile wenn keine Einträge vorhanden */}
                         {data.length === 0 ? (
                             <tr>
                                 <td colSpan={6} style={{ textAlign: "center", color: "#64748b" }}>
@@ -249,6 +273,7 @@ export default function LehrbetriebeLernendePage() {
                                 </td>
                             </tr>
                         ) : (
+                            // Alle Zuordnungen als Tabellenzeilen rendern
                             data.map((p) => (
                                 <tr key={p.id_lehrbetriebe_lernende}>
                                     <td style={{ fontWeight: 500 }}>{p.firma ?? "-"}</td>
@@ -257,6 +282,7 @@ export default function LehrbetriebeLernendePage() {
                                     <td>{p.ende ?? "-"}</td>
                                     <td>{p.beruf ?? "-"}</td>
                                     <td>
+                                        {/* Aktionsbuttons: Bearbeiten und Löschen */}
                                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
                                             <button
                                                 onClick={() => handleEdit(p)}
@@ -290,13 +316,13 @@ export default function LehrbetriebeLernendePage() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal für Erstellen / Bearbeiten einer Lehrbetriebe-Lernende-Zuordnung */}
             {editOpen && (
                 <div className="modal-overlay" onClick={() => setEditOpen(false)}>
                     <div
                         className="modal-content"
                         style={{ maxWidth: "650px", width: "90%" }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} // Klick im Modal schliesst es nicht
                     >
                         <h2 style={{ marginBottom: "1.5rem" }}>
                             {editItem
@@ -304,7 +330,9 @@ export default function LehrbetriebeLernendePage() {
                                 : "Neuer Lehrbetriebe–Lernende Eintrag"}
                         </h2>
 
+                        {/* Formularfelder: Lehrbetrieb, Lernender, Zeitraum und Beruf */}
                         <div style={{ display: "grid", gap: "1rem" }}>
+                            {/* Lehrbetrieb wird dynamisch aus der Lehrbetriebe-API befüllt */}
                             <label>
                                 Lehrbetrieb
                                 <select
@@ -322,6 +350,7 @@ export default function LehrbetriebeLernendePage() {
                                 </select>
                             </label>
 
+                            {/* Lernender wird dynamisch aus der Lernende-API befüllt */}
                             <label>
                                 Lernender
                                 <select
@@ -373,6 +402,7 @@ export default function LehrbetriebeLernendePage() {
                             </label>
                         </div>
 
+                        {/* Modal-Aktionen: Abbrechen oder Speichern */}
                         <div
                             style={{
                                 display: "flex",

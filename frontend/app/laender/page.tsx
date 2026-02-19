@@ -2,25 +2,36 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
+// Typ für einen Länder-Datensatz
 type Land = {
     id_country?: number;
     country?: string;
 };
 
 export default function LaenderPage() {
+    // Zustandsvariablen für Daten, Ladezustand und Fehlermeldung
     const [data, setData] = useState<Land[] | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Steuert ob das Bearbeitungs-Modal geöffnet ist
     const [editOpen, setEditOpen] = useState<boolean>(false);
+
+    // Aktuell bearbeitetes Land (null = neuer Eintrag)
     const [editItem, setEditItem] = useState<Land | null>(null);
+
+    // Formularwerte im Modal
     const [editForm, setEditForm] = useState<Partial<Land>>({});
 
+    // Basis-URL der API
     const API_BASE_URL = "http://localhost";
 
+    // Beim ersten Laden: Länderliste abrufen
     useEffect(() => {
         fetchData();
     }, []);
 
+    // Lädt alle Länder von der API
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -38,18 +49,21 @@ export default function LaenderPage() {
         }
     };
 
+    // Öffnet das Modal für ein neues Land mit leerem Feld
     const handleNew = () => {
         setEditItem(null);
         setEditForm({ country: "" });
         setEditOpen(true);
     };
 
+    // Öffnet das Modal für ein bestehendes Land und befüllt das Formular
     const handleEdit = (p: Land) => {
         setEditItem(p);
         setEditForm({ country: p.country ?? "" });
         setEditOpen(true);
     };
 
+    // Speichert das Land: PUT bei Bearbeitung, POST bei Neuerstellung
     const handleSave = async () => {
         const isEdit = !!editItem;
         setEditOpen(false);
@@ -60,14 +74,15 @@ export default function LaenderPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(
                     isEdit
-                        ? { id_country: editItem!.id_country, country: editForm.country }
-                        : editForm
+                        ? { id_country: editItem!.id_country, country: editForm.country } // Bestehenden Eintrag mit ID übergeben
+                        : editForm                                                          // Neuen Eintrag ohne ID übergeben
                 ),
             });
 
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Speichern neu laden
             await fetchData();
         } catch {
             alert("Speichern fehlgeschlagen");
@@ -76,6 +91,7 @@ export default function LaenderPage() {
         }
     };
 
+    // Löscht ein Land nach Bestätigung durch den Benutzer
     const handleDelete = async (p: Land) => {
         if (!p.id_country) return;
         if (!confirm(`Land "${p.country}" löschen?`)) return;
@@ -91,6 +107,7 @@ export default function LaenderPage() {
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
             alert("Löschen fehlgeschlagen");
@@ -99,7 +116,7 @@ export default function LaenderPage() {
 
     return (
         <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
-            {/* Header */}
+            {/* Seitenkopf mit Titel und Button für neues Land */}
             <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "2rem 0" }}>
                 <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
@@ -135,8 +152,9 @@ export default function LaenderPage() {
                 </div>
             </header>
 
-            {/* Content */}
+            {/* Hauptinhalt: Tabelle mit allen Ländern */}
             <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {/* Ladeanzeige während Daten abgerufen werden */}
                 {loading && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b" }}>
                         <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
@@ -144,6 +162,7 @@ export default function LaenderPage() {
                     </div>
                 )}
 
+                {/* Fehlermeldung bei gescheitertem API-Aufruf */}
                 {error && (
                     <div style={{ padding: "1rem", background: "#fee", color: "#c00", borderRadius: "0.5rem" }}>
                         {error}
@@ -166,6 +185,7 @@ export default function LaenderPage() {
                         </tr>
                         </thead>
                         <tbody>
+                        {/* Fallback-Zeile wenn keine Einträge vorhanden */}
                         {!data || data.length === 0 ? (
                             <tr>
                                 <td colSpan={2} style={{ textAlign: "center", color: "#64748b" }}>
@@ -173,10 +193,12 @@ export default function LaenderPage() {
                                 </td>
                             </tr>
                         ) : (
+                            // Alle Länder als Tabellenzeilen rendern
                             data.map((p) => (
                                 <tr key={p.id_country}>
                                     <td style={{ fontWeight: 500 }}>{p.country ?? "-"}</td>
                                     <td>
+                                        {/* Aktionsbuttons: Bearbeiten und Löschen */}
                                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
                                             <button
                                                 onClick={() => handleEdit(p)}
@@ -210,18 +232,19 @@ export default function LaenderPage() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal für Erstellen / Bearbeiten eines Landes */}
             {editOpen && (
                 <div className="modal-overlay" onClick={() => setEditOpen(false)}>
                     <div
                         className="modal-content"
                         style={{ maxWidth: "500px", width: "90%" }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} // Klick im Modal schliesst es nicht
                     >
                         <h2 style={{ marginBottom: "1.5rem" }}>
                             {editItem ? "Land bearbeiten" : "Neues Land"}
                         </h2>
 
+                        {/* Einziges Pflichtfeld: Landesname */}
                         <label style={{ display: "block" }}>
                             Land *
                             <input
@@ -230,6 +253,7 @@ export default function LaenderPage() {
                             />
                         </label>
 
+                        {/* Modal-Aktionen: Abbrechen oder Speichern */}
                         <div
                             style={{
                                 display: "flex",

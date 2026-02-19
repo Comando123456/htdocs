@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     GraduationCap,
     Users,
@@ -7,7 +7,6 @@ import {
     Building2,
     Globe,
     UserCheck,
-    TrendingUp,
     Calendar,
     Award,
     ChevronRight,
@@ -22,6 +21,64 @@ export default function HomePage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [darkMode, setDarkMode] = useState(true);
 
+    // Zustandsvariablen für echte Zahlen aus der API
+    const [countLernende, setCountLernende] = useState<number>(0);
+    const [countDozenten, setCountDozenten] = useState<number>(0);
+    const [countKurse, setCountKurse] = useState<number>(0);
+    const [countLehrbetriebe, setCountLehrbetriebe] = useState<number>(0);
+    const [countLaender, setCountLaender] = useState<number>(0);
+    const [countKurseLernende, setCountKurseLernende] = useState<number>(0);
+    const [countLehrbetriebeLernende, setCountLehrbetriebeLernende] = useState<number>(0);
+
+    // Basis-URL der API
+    const API_BASE_URL = "http://localhost";
+
+    // Beim ersten Laden: alle Zählwerte von der API abrufen
+    useEffect(() => {
+        // Anzahl Lernende
+        fetch(API_BASE_URL + "/lernende.php?all")
+            .then(r => r.json())
+            .then(json => Array.isArray(json) && setCountLernende(json.length))
+            .catch(() => console.error("Fehler beim Laden der Lernenden"));
+
+        // Anzahl Dozenten
+        fetch(API_BASE_URL + "/dozenten.php?all")
+            .then(r => r.json())
+            .then(json => Array.isArray(json) && setCountDozenten(json.length))
+            .catch(() => console.error("Fehler beim Laden der Dozenten"));
+
+        // Anzahl Kurse
+        fetch(API_BASE_URL + "/kurse.php?all")
+            .then(r => r.json())
+            .then(json => Array.isArray(json) && setCountKurse(json.length))
+            .catch(() => console.error("Fehler beim Laden der Kurse"));
+
+        // Anzahl Lehrbetriebe
+        fetch(API_BASE_URL + "/lehrbetriebe.php?all")
+            .then(r => r.json())
+            .then(json => Array.isArray(json) && setCountLehrbetriebe(json.length))
+            .catch(() => console.error("Fehler beim Laden der Lehrbetriebe"));
+
+        // Anzahl Länder
+        fetch(API_BASE_URL + "/laender.php?all")
+            .then(r => r.json())
+            .then(json => Array.isArray(json) && setCountLaender(json.length))
+            .catch(() => console.error("Fehler beim Laden der Länder"));
+
+        // Anzahl Kurse-Lernende-Zuordnungen
+        fetch(API_BASE_URL + "/kurse_lernende.php?all")
+            .then(r => r.json())
+            .then(json => Array.isArray(json) && setCountKurseLernende(json.length))
+            .catch(() => console.error("Fehler beim Laden der Kurse-Lernende"));
+
+        // Anzahl Lehrbetriebe-Lernende-Zuordnungen
+        fetch(API_BASE_URL + "/lehrbetriebe_lernende.php?all")
+            .then(r => r.json())
+            .then(json => Array.isArray(json) && setCountLehrbetriebeLernende(json.length))
+            .catch(() => console.error("Fehler beim Laden der Lehrbetriebe-Lernende"));
+    }, []);
+
+    // Navigationskarten mit echten Zählwerten aus der API
     const navItems = [
         {
             title: "Lernende",
@@ -29,7 +86,7 @@ export default function HomePage() {
             href: "/lernende",
             icon: GraduationCap,
             gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            stats: "248 Aktiv"
+            stats: `${countLernende} Aktiv`
         },
         {
             title: "Dozenten",
@@ -37,7 +94,7 @@ export default function HomePage() {
             href: "/dozenten",
             icon: Users,
             gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-            stats: "42 Dozenten"
+            stats: `${countDozenten} Dozenten`
         },
         {
             title: "Kurse",
@@ -45,7 +102,7 @@ export default function HomePage() {
             href: "/kurse",
             icon: BookOpen,
             gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-            stats: "36 Kurse"
+            stats: `${countKurse} Kurse`
         },
         {
             title: "Kurse-Lernende",
@@ -53,7 +110,7 @@ export default function HomePage() {
             href: "/kurse-lernende",
             icon: UserCheck,
             gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-            stats: "512 Zuordnungen"
+            stats: `${countKurseLernende} Zuordnungen`
         },
         {
             title: "Lehrbetriebe",
@@ -61,7 +118,7 @@ export default function HomePage() {
             href: "/lehrbetriebe",
             icon: Building2,
             gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-            stats: "68 Betriebe"
+            stats: `${countLehrbetriebe} Betriebe`
         },
         {
             title: "Lehrbetriebe-Lernende",
@@ -69,7 +126,7 @@ export default function HomePage() {
             href: "/lehrbetriebe-lernende",
             icon: Building2,
             gradient: "linear-gradient(135deg, #30cfd0 0%, #330867 100%)",
-            stats: "248 Zuordnungen"
+            stats: `${countLehrbetriebeLernende} Zuordnungen`
         },
         {
             title: "Länder",
@@ -77,17 +134,19 @@ export default function HomePage() {
             href: "/laender",
             icon: Globe,
             gradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
-            stats: "12 Länder"
+            stats: `${countLaender} Länder`
         }
     ];
 
+    // Schnellstatistiken mit echten Werten aus der API
     const quickStats = [
-        { label: "Aktive Kurse", value: "36", icon: BookOpen, trend: "+12%" },
-        { label: "Lernende", value: "248", icon: GraduationCap, trend: "+8%" },
-        { label: "Abschlussrate", value: "94%", icon: Award, trend: "+3%" },
-        { label: "Nächster Kurs", value: "3 Tage", icon: Calendar, trend: "" }
+        { label: "Aktive Kurse", value: String(countKurse), icon: BookOpen },
+        { label: "Lernende", value: String(countLernende), icon: GraduationCap },
+        { label: "Abschlussrate", value: "94%", icon: Award },
+        { label: "Nächster Kurs", value: "3 Tage", icon: Calendar }
     ];
 
+    // Statische Beispieldaten für kürzliche Aktivitäten
     const recentActivities = [
         { action: "Neuer Kurs erstellt", item: "Web Development Basics", time: "vor 2 Stunden" },
         { action: "Lernende hinzugefügt", item: "Maria Schmidt", time: "vor 4 Stunden" },
@@ -96,7 +155,7 @@ export default function HomePage() {
 
     return (
         <div style={{ minHeight: "100vh", background: darkMode ? "linear-gradient(to bottom, #0f172a 0%, #1e293b 100%)" : "linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%)", transition: "background 0.3s ease" }}>
-            {/* Top Navigation Bar */}
+            {/* Navigationsleiste mit Dark Mode Toggle, Benachrichtigungen und Einstellungen */}
             <nav style={{
                 background: darkMode ? "rgba(15, 23, 42, 0.9)" : "rgba(255, 255, 255, 0.9)",
                 backdropFilter: "blur(10px)",
@@ -115,6 +174,7 @@ export default function HomePage() {
                     justifyContent: "space-between",
                     alignItems: "center"
                 }}>
+                    {/* Logo und App-Name */}
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                         <div style={{
                             width: "40px",
@@ -131,7 +191,10 @@ export default function HomePage() {
                             Kursverwaltung
                         </span>
                     </div>
+
+                    {/* Aktionsbuttons: Dark Mode, Benachrichtigungen, Einstellungen */}
                     <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                        {/* Schaltet zwischen Dark und Light Mode */}
                         <button
                             onClick={() => setDarkMode(!darkMode)}
                             style={{
@@ -180,12 +243,13 @@ export default function HomePage() {
                 </div>
             </nav>
 
-            {/* Hero Section */}
+            {/* Hauptinhalt */}
             <div style={{
                 maxWidth: "1400px",
                 margin: "0 auto",
                 padding: "3rem 2rem 2rem"
             }}>
+                {/* Hero-Banner mit Begrüssung und Suchfeld */}
                 <div style={{
                     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                     borderRadius: "20px",
@@ -195,6 +259,7 @@ export default function HomePage() {
                     overflow: "hidden",
                     boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)"
                 }}>
+                    {/* Dekoratives Hintergrundleuchten */}
                     <div style={{
                         position: "absolute",
                         top: "-50px",
@@ -218,7 +283,7 @@ export default function HomePage() {
                             Zentrale Verwaltung für Kurse, Lernende und Lehrbetriebe
                         </p>
 
-                        {/* Search Bar */}
+                        {/* Suchfeld */}
                         <div style={{
                             background: "rgba(255, 255, 255, 0.2)",
                             backdropFilter: "blur(10px)",
@@ -250,7 +315,7 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Quick Stats */}
+                {/* Schnellstatistiken mit echten API-Werten */}
                 <div style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
@@ -276,19 +341,6 @@ export default function HomePage() {
                              }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "0.75rem" }}>
                                 <stat.icon size={24} style={{ color: "#667eea" }} />
-                                {stat.trend && (
-                                    <span style={{
-                                        fontSize: "0.875rem",
-                                        color: "#22c55e",
-                                        fontWeight: "600",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "0.25rem"
-                                    }}>
-                                        <TrendingUp size={14} />
-                                        {stat.trend}
-                                    </span>
-                                )}
                             </div>
                             <div style={{ fontSize: "2rem", fontWeight: "700", color: darkMode ? "#f8fafc" : "#0f172a", marginBottom: "0.25rem" }}>
                                 {stat.value}
@@ -300,9 +352,9 @@ export default function HomePage() {
                     ))}
                 </div>
 
-                {/* Main Grid */}
+                {/* Hauptraster: Verwaltungskarten links, Aktivitäten rechts */}
                 <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "2rem", marginBottom: "3rem" }}>
-                    {/* Navigation Cards */}
+                    {/* Navigationskarten zu den Verwaltungsbereichen */}
                     <div>
                         <h2 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "1.5rem", color: darkMode ? "#f8fafc" : "#0f172a" }}>
                             Verwaltungsbereiche
@@ -340,6 +392,7 @@ export default function HomePage() {
                                             e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.05)";
                                         }}
                                     >
+                                        {/* Dekorativer Farbverlauf in der oberen rechten Ecke */}
                                         <div style={{
                                             position: "absolute",
                                             top: 0,
@@ -352,6 +405,7 @@ export default function HomePage() {
                                         }}></div>
 
                                         <div style={{ position: "relative", zIndex: 1 }}>
+                                            {/* Icon mit Farbverlauf-Hintergrund */}
                                             <div style={{
                                                 width: "56px",
                                                 height: "56px",
@@ -384,6 +438,7 @@ export default function HomePage() {
                                                 {item.description}
                                             </p>
 
+                                            {/* Echte Anzahl aus der API und Pfeil-Icon */}
                                             <div style={{
                                                 display: "flex",
                                                 justifyContent: "space-between",
@@ -407,7 +462,7 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Recent Activity */}
+                    {/* Kürzliche Aktivitäten */}
                     <div>
                         <h2 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "1.5rem", color: darkMode ? "#f8fafc" : "#0f172a" }}>
                             Kürzliche Aktivitäten
@@ -419,6 +474,7 @@ export default function HomePage() {
                             boxShadow: darkMode ? "0 4px 6px rgba(0, 0, 0, 0.3)" : "0 4px 6px rgba(0, 0, 0, 0.05)",
                             border: darkMode ? "1px solid #334155" : "1px solid #f1f5f9"
                         }}>
+                            {/* Aktivitätsliste mit Trennlinien zwischen den Einträgen */}
                             {recentActivities.map((activity, idx) => (
                                 <div key={idx} style={{
                                     paddingBottom: idx < recentActivities.length - 1 ? "1.25rem" : 0,

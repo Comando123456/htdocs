@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 
+// Typ für einen Dozenten-Datensatz
 type Dozent = {
     id_dozent?: number;
     vorname?: string;
@@ -17,27 +18,38 @@ type Dozent = {
     birthdate?: string;
 };
 
+// Typ für einen Länder-Eintrag (wird für das Auswahlmenü benötigt)
 type Land = {
     id_country: number;
     country: string;
 };
 
 export default function DozentenPage() {
+    // Zustandsvariablen für Daten, Ladezustand und Fehlermeldung
     const [data, setData] = useState<Dozent[] | null>(null);
     const [laender, setLaender] = useState<Land[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Steuert ob das Bearbeitungs-Modal geöffnet ist
     const [editOpen, setEditOpen] = useState(false);
+
+    // Aktuell bearbeiteter Dozent (null = neuer Eintrag)
     const [editItem, setEditItem] = useState<Dozent | null>(null);
+
+    // Formularwerte im Modal
     const [editForm, setEditForm] = useState<Partial<Dozent>>({});
 
+    // Basis-URL der API
     const API_BASE_URL = "http://localhost";
 
+    // Beim ersten Laden: Dozenten und Länder abrufen
     useEffect(() => {
         fetchData();
         fetchLaender();
     }, []);
 
+    // Lädt alle verfügbaren Länder für das Auswahlmenü
     const fetchLaender = async () => {
         try {
             const resp = await fetch(API_BASE_URL + "/laender.php?all");
@@ -51,6 +63,7 @@ export default function DozentenPage() {
         }
     };
 
+    // Lädt alle Dozenten von der API
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -68,12 +81,14 @@ export default function DozentenPage() {
         }
     };
 
+    // Gibt den Ländernamen anhand der Länder-ID zurück
     const getLandName = (nr_land: number | string | undefined): string => {
         if (!nr_land) return "-";
         const land = laender.find(l => l.id_country === Number(nr_land));
         return land ? land.country : String(nr_land);
     };
 
+    // Öffnet das Modal für einen neuen Dozenten mit leeren Feldern
     const handleNew = () => {
         setEditItem(null);
         setEditForm({
@@ -92,6 +107,7 @@ export default function DozentenPage() {
         setEditOpen(true);
     };
 
+    // Öffnet das Modal für einen bestehenden Dozenten und befüllt das Formular
     const handleEdit = (p: Dozent) => {
         setEditItem(p);
         setEditForm({
@@ -110,6 +126,7 @@ export default function DozentenPage() {
         setEditOpen(true);
     };
 
+    // Speichert den Dozenten: PUT bei Bearbeitung, POST bei Neuerstellung
     const handleSave = async () => {
         const isEdit = !!editItem;
         setEditOpen(false);
@@ -120,14 +137,15 @@ export default function DozentenPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(
                     isEdit
-                        ? { id_dozent: editItem!.id_dozent, ...editForm }
-                        : editForm
+                        ? { id_dozent: editItem!.id_dozent, ...editForm } // Bestehenden Eintrag mit ID übergeben
+                        : editForm                                          // Neuen Eintrag ohne ID übergeben
                 ),
             });
 
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Speichern neu laden
             await fetchData();
         } catch {
             alert("Speichern fehlgeschlagen");
@@ -136,6 +154,7 @@ export default function DozentenPage() {
         }
     };
 
+    // Löscht einen Dozenten nach Bestätigung durch den Benutzer
     const handleDelete = async (p: Dozent) => {
         if (!p.id_dozent) return;
         if (!confirm(`Dozent "${p.vorname} ${p.nachname}" löschen?`)) return;
@@ -151,6 +170,7 @@ export default function DozentenPage() {
             const text = await resp.text();
             if (!resp.ok) throw new Error(text);
 
+            // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
             alert("Löschen fehlgeschlagen");
@@ -159,7 +179,7 @@ export default function DozentenPage() {
 
     return (
         <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
-            {/* Header */}
+            {/* Seitenkopf mit Titel und Button für neuen Dozenten */}
             <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "2rem 0" }}>
                 <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
@@ -195,8 +215,9 @@ export default function DozentenPage() {
                 </div>
             </header>
 
-            {/* Content */}
+            {/* Hauptinhalt: Tabelle mit allen Dozenten */}
             <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+                {/* Ladeanzeige während Daten abgerufen werden */}
                 {loading && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#64748b" }}>
                         <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
@@ -204,6 +225,7 @@ export default function DozentenPage() {
                     </div>
                 )}
 
+                {/* Fehlermeldung bei gescheitertem API-Aufruf */}
                 {error && (
                     <div style={{ padding: "1rem", background: "#fee", color: "#c00", borderRadius: "0.5rem" }}>
                         {error}
@@ -230,6 +252,7 @@ export default function DozentenPage() {
                         </tr>
                         </thead>
                         <tbody>
+                        {/* Fallback-Zeile wenn keine Einträge vorhanden */}
                         {!data || data.length === 0 ? (
                             <tr>
                                 <td colSpan={6} style={{ textAlign: "center", color: "#64748b" }}>
@@ -237,6 +260,7 @@ export default function DozentenPage() {
                                 </td>
                             </tr>
                         ) : (
+                            // Alle Dozenten als Tabellenzeilen rendern
                             data.map((p) => (
                                 <tr key={p.id_dozent}>
                                     <td style={{ fontWeight: 500 }}>{p.vorname ?? "-"}</td>
@@ -245,6 +269,7 @@ export default function DozentenPage() {
                                     <td>{p.ort ?? "-"}</td>
                                     <td>{getLandName(p.nr_land)}</td>
                                     <td>
+                                        {/* Aktionsbuttons: Bearbeiten und Löschen */}
                                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
                                             <button
                                                 onClick={() => handleEdit(p)}
@@ -278,18 +303,19 @@ export default function DozentenPage() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal für Erstellen / Bearbeiten eines Dozenten */}
             {editOpen && (
                 <div className="modal-overlay" onClick={() => setEditOpen(false)}>
                     <div
                         className="modal-content"
                         style={{ maxWidth: "800px", width: "90%" }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} // Klick im Modal schliesst es nicht
                     >
                         <h2 style={{ marginBottom: "1.5rem" }}>
                             {editItem ? "Dozent bearbeiten" : "Neuer Dozent"}
                         </h2>
 
+                        {/* Formularfelder im 2-Spalten-Grid */}
                         <div
                             style={{
                                 display: "grid",
@@ -315,6 +341,7 @@ export default function DozentenPage() {
                                 />
                             </label>
 
+                            {/* Strasse nimmt die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>
                                 Strasse
                                 <input
@@ -342,6 +369,7 @@ export default function DozentenPage() {
                                 />
                             </label>
 
+                            {/* Land wird dynamisch aus der Länder-API befüllt */}
                             <label>
                                 Land
                                 <select
@@ -404,6 +432,7 @@ export default function DozentenPage() {
                                 />
                             </label>
 
+                            {/* E-Mail nimmt die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>
                                 E-Mail
                                 <input
@@ -413,6 +442,7 @@ export default function DozentenPage() {
                                 />
                             </label>
 
+                            {/* Geburtsdatum nimmt die volle Breite ein */}
                             <label style={{ gridColumn: "1 / -1" }}>
                                 Geburtsdatum
                                 <input
@@ -423,6 +453,7 @@ export default function DozentenPage() {
                             </label>
                         </div>
 
+                        {/* Modal-Aktionen: Abbrechen oder Speichern */}
                         <div
                             style={{
                                 display: "flex",
