@@ -110,7 +110,7 @@ export default function LaenderPage() {
             // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
-            alert("Löschen fehlgeschlagen");
+            alert("Löschen nicht möglich: Das Land wird noch verwendet.");
         }
     };
 

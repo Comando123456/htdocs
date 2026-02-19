@@ -184,7 +184,7 @@ export default function LehrbetriebeLernendePage() {
             // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
-            alert("Löschen fehlgeschlagen");
+            alert("Löschen fehlgeschlagen: Der Datensatz ist noch Lehrbetrieben bzw. Lernenden zugeordnet. Entfernen Sie zuerst die entsprechenden Zuordnungen.");
         }
     };
 

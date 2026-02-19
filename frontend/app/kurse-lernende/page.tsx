@@ -165,7 +165,7 @@ export default function KurseLernendePage() {
             // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
-            alert("Löschen fehlgeschlagen");
+            alert("Löschen fehlgeschlagen: Der Datensatz ist noch Kursen bzw. Lernenden zugeordnet. Entfernen Sie zuerst die entsprechenden Zuordnungen.");
         }
     };
 

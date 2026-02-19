@@ -118,7 +118,8 @@ export default function LehrbetriebePage() {
             // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
-            alert("Löschen fehlgeschlagen");
+            alert("Löschen fehlgeschlagen: Der Lehrbetrieb wird noch verwendet.");
+
         }
     };
 

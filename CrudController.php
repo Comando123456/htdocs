@@ -115,7 +115,7 @@ final class CrudController
         } catch (Throwable $e) {
             // Fängt alle Fehler ab und gibt eine generische Fehlermeldung zurück
             // (keine Details nach aussen, um Sicherheit zu gewährleisten)
-            Validation::error('Interner Serverfehler', 500);
+            Validation::error($e->getMessage(), 500);
         }
     }
 
@@ -315,7 +315,7 @@ final class CrudController
         $stmt = $this->pdo->prepare(
             "DELETE FROM {$this->table} WHERE {$this->primaryKey} = ?"
         );
-        
+
         // Führt die Abfrage mit der ID aus
         $stmt->execute([$id]);
 

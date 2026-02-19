@@ -4,9 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="remove useless menu buttons">
+    <list default="true" id="431456b2-c691-435c-9854-8263e81b7045" name="Changes" comment="remove useless searchbar">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CrudController.php" beforeDir="false" afterPath="$PROJECT_DIR$/CrudController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/dozenten/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse-lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/kurse/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/laender/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/laender/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lehrbetriebe-lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lehrbetriebe-lernende/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lehrbetriebe/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lehrbetriebe/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/lernende/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,6 +111,8 @@
       <workItem from="1771484635456" duration="3104000" />
       <workItem from="1771488439580" duration="7606000" />
       <workItem from="1771503232025" duration="1812000" />
+      <workItem from="1771505099648" duration="95000" />
+      <workItem from="1771506234838" duration="3143000" />
     </task>
     <task id="LOCAL-00001" summary="implement CRUD for all pages">
       <option name="closed" value="true" />
@@ -177,7 +186,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771504889789</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="remove useless searchbar">
+      <option name="closed" value="true" />
+      <created>1771505135959</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1771505135959</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -204,6 +221,7 @@
     <MESSAGE value="updated required fields" />
     <MESSAGE value="add success-rate of students and next course" />
     <MESSAGE value="remove useless menu buttons" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove useless menu buttons" />
+    <MESSAGE value="remove useless searchbar" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove useless searchbar" />
   </component>
 </project>

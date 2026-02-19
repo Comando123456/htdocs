@@ -159,7 +159,7 @@ export default function KursePage() {
             // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
-            alert("Löschen fehlgeschlagen");
+            alert("Löschen fehlgeschlagen: Der Kurs wird noch verwendet.");
         }
     };
 

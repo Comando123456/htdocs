@@ -173,7 +173,7 @@ export default function DozentenPage() {
             // Liste nach erfolgreichem Löschen neu laden
             await fetchData();
         } catch {
-            alert("Löschen fehlgeschlagen");
+            alert("Löschen fehlgeschlagen: Der Dozent wird noch verwendet.");
         }
     };
 
