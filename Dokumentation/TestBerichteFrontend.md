@@ -15,20 +15,20 @@
 
 ## Testdaten
 
-| Feld         | Beispielwert            |
-|--------------|-------------------------|
-| Vorname      | Anna                    |
-| Nachname     | Muster                  |
-| Strasse      | Bahnhofstrasse 12       |
-| PLZ          | 8001                    |
-| Ort          | Zürich                  |
-| Land         | Schweiz                 |
-| Geschlecht   | w                       |
-| Telefon      | 044 123 45 67           |
-| Handy        | 079 123 45 67           |
-| E-Mail       | anna.muster@lehre.ch    |
-| E-Mail privat| anna.muster@gmail.com   |
-| Geburtsdatum | 15.03.2005              |
+| Feld         | Beispielwert          |
+|--------------|-----------------------|
+| Vorname      | Anna                  |
+| Nachname     | Muster                |
+| Strasse      | Bahnhofstrasse 12     |
+| PLZ          | 8001                  |
+| Ort          | Zürich                |
+| Land         | Schweiz               |
+| Geschlecht   | Weiblich              |
+| Telefon      | 044 123 45 67         |
+| Handy        | 079 123 45 67         |
+| E-Mail       | anna.muster@lehre.ch  |
+| E-Mail privat| anna.muster@gmail.com |
+| Geburtsdatum | 15.03.2005            |
 
 ---
 
@@ -52,12 +52,12 @@
 
 **Ziel:** Die Daten eines bestehenden Lernenden werden korrekt geändert und gespeichert.
 
-| Schritt | Aktion                                          | Erwartetes Ergebnis                                    | Tatsächliches Ergebnis                                 |
-|---------|-------------------------------------------------|--------------------------------------------------------|--------------------------------------------------------|
-| 1       | Auf das **Stift-Symbol** eines Eintrags klicken | Formular öffnet sich mit den bestehenden Daten         | Formular öffnet sich mit den bestehenden Daten         |
-| 2       | Einen oder mehrere Werte ändern                 | Eingabe wird im Feld übernommen                        | Eingabe wird im Feld übernommen                        |
-| 3       | Speichern klicken                               | Erfolgsmeldung erscheint                               | Erfolgsmeldung erscheint                               |
-| 4       | Liste prüfen                                    | Geänderter Wert wird korrekt in der Tabelle angezeigt  | Geänderter Wert wird korrekt in der Tabelle angezeigt  |
+| Schritt | Aktion                                                       | Erwartetes Ergebnis                                    | Tatsächliches Ergebnis                                 |
+|---------|--------------------------------------------------------------|--------------------------------------------------------|--------------------------------------------------------|
+| 1       | Auf das **Stift-Symbol** eines Eintrags klicken              | Formular öffnet sich mit den bestehenden Daten         | Formular öffnet sich mit den bestehenden Daten         |
+| 2       | Einen oder mehrere Werte ändern (zb. Name von Anna zu Annie) | Eingabe wird im Feld übernommen                        | Eingabe wird im Feld übernommen                        |
+| 3       | Speichern klicken                                            | Erfolgsmeldung erscheint                               | Erfolgsmeldung erscheint                               |
+| 4       | Liste prüfen                                                 | Geänderter Wert wird korrekt in der Tabelle angezeigt  | Geänderter Wert wird korrekt in der Tabelle angezeigt  |
 
 **Status:** ✅ Bestanden
 
@@ -67,10 +67,10 @@
 
 **Ziel:** Ein Lernender wird erfolgreich gelöscht und erscheint nicht mehr in der Liste.
 
-| Schritt | Aktion                                                  | Erwartetes Ergebnis                        | Tatsächliches Ergebnis                     |
-|---------|---------------------------------------------------------|--------------------------------------------|--------------------------------------------|
-| 1       | Auf das **Löschen-Symbol** (🗑️) eines Eintrags klicken | Bestätigungsdialog erscheint               | Bestätigungsdialog erscheint               |
-| 2       | Löschen bestätigen                                      | Erfolgsmeldung erscheint                   | Erfolgsmeldung erscheint                   |
+| Schritt | Aktion                                                  | Erwartetes Ergebnis                              | Tatsächliches Ergebnis                     |
+|---------|---------------------------------------------------------|--------------------------------------------------|--------------------------------------------|
+| 1       | Auf das **Löschen-Symbol** (🗑️) eines Eintrags klicken | Bestätigungsdialog erscheint                     | Bestätigungsdialog erscheint               |
+| 2       | Löschen bestätigen                                      | geht automatisch zurueck in die Liste             | geht automatisch zurueck in die Liste                   |
 | 3       | Liste prüfen                                            | Lernender ist nicht mehr in der Tabelle sichtbar | Lernender ist nicht mehr in der Tabelle sichtbar |
 
 **Status:** ✅ Bestanden
