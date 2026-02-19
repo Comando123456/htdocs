@@ -30,6 +30,15 @@ export default function HomePage() {
     const [countKurseLernende, setCountKurseLernende] = useState<number>(0);
     const [countLehrbetriebeLernende, setCountLehrbetriebeLernende] = useState<number>(0);
 
+    // Abschlussrate: Anteil der Noten >= 4.0 an allen bewerteten Einträgen
+    const [abschlussrate, setAbschlussrate] = useState<string>("–");
+
+    // Nächster Kurs: frühestes Startdatum das in der Zukunft liegt
+    const [naechsterKurs, setNaechsterKurs] = useState<string>("–");
+
+    // Kürzliche Aktivitäten: letzte Einträge aus Lernende, Dozenten, Kurse und Kurse-Lernende
+    const [recentActivities, setRecentActivities] = useState<{ action: string; item: string }[]>([]);
+
     // Basis-URL der API
     const API_BASE_URL = "http://localhost";
 
@@ -47,10 +56,40 @@ export default function HomePage() {
             .then(json => Array.isArray(json) && setCountDozenten(json.length))
             .catch(() => console.error("Fehler beim Laden der Dozenten"));
 
-        // Anzahl Kurse
+        // Anzahl Kurse + nächster Kurs berechnen
         fetch(API_BASE_URL + "/kurse.php?all")
             .then(r => r.json())
-            .then(json => Array.isArray(json) && setCountKurse(json.length))
+            .then(json => {
+                if (!Array.isArray(json)) return;
+                setCountKurse(json.length);
+
+                // Heutiges Datum als YYYY-MM-DD String (Timezone-sicher, kein UTC-Bug)
+                const nowLocal = new Date();
+                const heuteStr = `${nowLocal.getFullYear()}-${String(nowLocal.getMonth() + 1).padStart(2, "0")}-${String(nowLocal.getDate()).padStart(2, "0")}`;
+
+                // Filtert alle Kurse mit einem Startdatum >= heute (String-Vergleich, da ISO-Format)
+                const zukuenftigeKurse = json
+                    .filter((k: any) => k.startdatum && k.startdatum >= heuteStr)
+                    .sort((a: any, b: any) => a.startdatum.localeCompare(b.startdatum));
+
+                if (zukuenftigeKurse.length > 0) {
+                    // Berechnet Differenz in Tagen via lokale Datumsstrings
+                    const [y, m, d] = zukuenftigeKurse[0].startdatum.split("-").map(Number);
+                    const naechstesDatum = new Date(y, m - 1, d); // lokale Zeit, kein UTC
+                    const heuteDatum = new Date(nowLocal.getFullYear(), nowLocal.getMonth(), nowLocal.getDate());
+                    const diffTage = Math.round((naechstesDatum.getTime() - heuteDatum.getTime()) / (1000 * 60 * 60 * 24));
+
+                    if (diffTage === 0) {
+                        setNaechsterKurs("Heute");
+                    } else if (diffTage === 1) {
+                        setNaechsterKurs("Morgen");
+                    } else {
+                        setNaechsterKurs(`${diffTage} Tage`);
+                    }
+                } else {
+                    setNaechsterKurs("Keiner");
+                }
+            })
             .catch(() => console.error("Fehler beim Laden der Kurse"));
 
         // Anzahl Lehrbetriebe
@@ -65,10 +104,26 @@ export default function HomePage() {
             .then(json => Array.isArray(json) && setCountLaender(json.length))
             .catch(() => console.error("Fehler beim Laden der Länder"));
 
-        // Anzahl Kurse-Lernende-Zuordnungen
+        // Anzahl Kurse-Lernende-Zuordnungen + Abschlussrate berechnen
         fetch(API_BASE_URL + "/kurse_lernende.php?all")
             .then(r => r.json())
-            .then(json => Array.isArray(json) && setCountKurseLernende(json.length))
+            .then(json => {
+                if (!Array.isArray(json)) return;
+                setCountKurseLernende(json.length);
+
+                // Filtert nur Einträge mit einer gesetzten Note
+                const bewertet = json.filter((e: any) => e.note !== null && e.note !== "" && e.note !== undefined);
+
+                if (bewertet.length > 0) {
+                    // Zählt Einträge mit Note >= 4.0 (bestanden)
+                    const bestanden = bewertet.filter((e: any) => parseFloat(e.note) >= 4.0).length;
+                    const rate = Math.round((bestanden / bewertet.length) * 100);
+                    setAbschlussrate(`${rate}%`);
+                } else {
+                    // Noch keine bewerteten Einträge vorhanden
+                    setAbschlussrate("–");
+                }
+            })
             .catch(() => console.error("Fehler beim Laden der Kurse-Lernende"));
 
         // Anzahl Lehrbetriebe-Lernende-Zuordnungen
@@ -76,6 +131,57 @@ export default function HomePage() {
             .then(r => r.json())
             .then(json => Array.isArray(json) && setCountLehrbetriebeLernende(json.length))
             .catch(() => console.error("Fehler beim Laden der Lehrbetriebe-Lernende"));
+
+        // Kürzliche Aktivitäten: letzte 3 Einträge aus jeder Tabelle laden und zusammenführen
+        Promise.all([
+            fetch(API_BASE_URL + "/lernende.php?all").then(r => r.json()),
+            fetch(API_BASE_URL + "/dozenten.php?all").then(r => r.json()),
+            fetch(API_BASE_URL + "/kurse.php?all").then(r => r.json()),
+            fetch(API_BASE_URL + "/kurse_lernende.php?all").then(r => r.json()),
+            fetch(API_BASE_URL + "/lehrbetriebe.php?all").then(r => r.json()),
+            fetch(API_BASE_URL + "/lehrbetriebe_lernende.php?all").then(r => r.json()),
+        ]).then(([lernende, dozenten, kurse, kurseLernende, lehrbetriebe, lehrbetriebeLernende]) => {
+            const activities: { action: string; item: string }[] = [];
+
+            // Letzter Lernender
+            if (Array.isArray(lernende) && lernende.length > 0) {
+                const last = lernende[lernende.length - 1];
+                activities.push({ action: "Neuer Lernender", item: `${last.vorname ?? ""} ${last.nachname ?? ""}`.trim() });
+            }
+
+            // Letzter Dozent
+            if (Array.isArray(dozenten) && dozenten.length > 0) {
+                const last = dozenten[dozenten.length - 1];
+                activities.push({ action: "Neuer Dozent", item: `${last.vorname ?? ""} ${last.nachname ?? ""}`.trim() });
+            }
+
+            // Letzter Kurs
+            if (Array.isArray(kurse) && kurse.length > 0) {
+                const last = kurse[kurse.length - 1];
+                activities.push({ action: "Neuer Kurs", item: last.kursthema ?? last.kursnummer ?? "–" });
+            }
+
+            // Letzte Kurse-Lernende-Zuordnung
+            if (Array.isArray(kurseLernende) && kurseLernende.length > 0) {
+                const last = kurseLernende[kurseLernende.length - 1];
+                activities.push({ action: "Neue Kurszuordnung", item: last.lernender_name ?? `Eintrag #${last.id_kurse_lernende}` });
+            }
+
+            // Letzter Lehrbetrieb
+            if (Array.isArray(lehrbetriebe) && lehrbetriebe.length > 0) {
+                const last = lehrbetriebe[lehrbetriebe.length - 1];
+                activities.push({ action: "Neuer Lehrbetrieb", item: last.firma ?? "–" });
+            }
+
+            // Letzte Lehrbetriebe-Lernende-Zuordnung
+            if (Array.isArray(lehrbetriebeLernende) && lehrbetriebeLernende.length > 0) {
+                const last = lehrbetriebeLernende[lehrbetriebeLernende.length - 1];
+                activities.push({ action: "Neue Betriebszuordnung", item: last.lernender_name ?? `Eintrag #${last.id_lehrbetriebe_lernende}` });
+            }
+
+            // Maximal 6 Einträge anzeigen
+            setRecentActivities(activities.slice(0, 6));
+        }).catch(() => console.error("Fehler beim Laden der kürzlichen Aktivitäten"));
     }, []);
 
     // Navigationskarten mit echten Zählwerten aus der API
@@ -138,20 +244,15 @@ export default function HomePage() {
         }
     ];
 
-    // Schnellstatistiken mit echten Werten aus der API
+    // Schnellstatistiken – alle vier Werte kommen jetzt aus der API
     const quickStats = [
-        { label: "Aktive Kurse", value: String(countKurse), icon: BookOpen },
-        { label: "Lernende", value: String(countLernende), icon: GraduationCap },
-        { label: "Abschlussrate", value: "94%", icon: Award },
-        { label: "Nächster Kurs", value: "3 Tage", icon: Calendar }
+        { label: "Aktive Kurse",  value: String(countKurse),  icon: BookOpen  },
+        { label: "Lernende",      value: String(countLernende), icon: GraduationCap },
+        { label: "Abschlussrate", value: abschlussrate,         icon: Award    },
+        { label: "Nächster Kurs", value: naechsterKurs,         icon: Calendar }
     ];
 
-    // Statische Beispieldaten für kürzliche Aktivitäten
-    const recentActivities = [
-        { action: "Neuer Kurs erstellt", item: "Web Development Basics", time: "vor 2 Stunden" },
-        { action: "Lernende hinzugefügt", item: "Maria Schmidt", time: "vor 4 Stunden" },
-        { action: "Dozent aktualisiert", item: "Dr. Hans Müller", time: "vor 1 Tag" }
-    ];
+
 
     return (
         <div style={{ minHeight: "100vh", background: darkMode ? "linear-gradient(to bottom, #0f172a 0%, #1e293b 100%)" : "linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%)", transition: "background 0.3s ease" }}>
@@ -315,7 +416,7 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Schnellstatistiken mit echten API-Werten */}
+                {/* Schnellstatistiken – alle vier Werte kommen aus der API */}
                 <div style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
@@ -489,11 +590,8 @@ export default function HomePage() {
                                     }}>
                                         {activity.action}
                                     </div>
-                                    <div style={{ fontSize: "0.875rem", color: darkMode ? "#94a3b8" : "#64748b", marginBottom: "0.5rem" }}>
+                                    <div style={{ fontSize: "0.875rem", color: darkMode ? "#94a3b8" : "#64748b" }}>
                                         {activity.item}
-                                    </div>
-                                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-                                        {activity.time}
                                     </div>
                                 </div>
                             ))}
