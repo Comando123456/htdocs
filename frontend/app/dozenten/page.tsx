@@ -371,7 +371,7 @@ export default function DozentenPage() {
 
                             {/* Land wird dynamisch aus der Länder-API befüllt */}
                             <label>
-                                Land
+                                Land *
                                 <select
                                     value={editForm.nr_land ?? ""}
                                     onChange={(e) => setEditForm({ ...editForm, nr_land: e.target.value })}

@@ -114,6 +114,11 @@ export default function LernendePage() {
         const isEdit = !!editItem;
         setEditOpen(false);
 
+        if (!editForm.vorname || !editForm.nachname || !editForm.email || !editForm.nr_land) {
+            alert("Bitte alle Pflichtfelder ausfüllen (Vorname, Nachname, E-Mail, Land)");
+            return;
+        }
+
         try {
             const resp = await fetch(API_BASE_URL + "/lernende.php", {
                 method: isEdit ? "PUT" : "POST",
@@ -251,7 +256,7 @@ export default function LernendePage() {
 
                             {/* Land wird dynamisch aus der Länder-API befüllt */}
                             <label>
-                                Land
+                                Land *
                                 <select
                                     value={editForm.nr_land ?? ""}
                                     onChange={(e) => setEditForm({ ...editForm, nr_land: e.target.value })}
